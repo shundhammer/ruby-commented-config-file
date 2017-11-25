@@ -14,7 +14,7 @@ This is a Ruby clone of my
 
 **_TO DO_**
 
-_- Generic Diff class for string vectors_
+_- Generic Diff class for string arrays_
 
 
 

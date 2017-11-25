@@ -72,17 +72,17 @@
 #
 class CommentedConfigFile
   # @return [Array<Entry>] The config file entries.
-  attr_reader :entries 
+  attr_accessor :entries
 
   # @return [String] The header comments, terminated with a newline.
-  attr_reader :header_comments
+  attr_accessor :header_comments
 
   # @return [String] The footer comments, terminated with a newline.
-  attr_reader :footer_comments
+  attr_accessor :footer_comments
 
   # @return [String] The last filename content was read from.
-  attr_reader :filename 
-  
+  attr_reader :filename
+
   # @return [String] The comment marker; "#" by default.
   attr_accessor :comment_marker
 
@@ -90,7 +90,7 @@ class CommentedConfigFile
     @comment_marker = "#"
     @header_comments = nil
     @footer_comments = nil
-    @entries = nil
+    @entries = []
     @filename = nil
   end
 
@@ -100,5 +100,97 @@ class CommentedConfigFile
 
   def footer_comments?
     !@footer_comments.nil? && ! @footer_comments.empty?
+  end
+
+  def clear_entries
+    @entries = []
+  end
+
+  def clear_all
+    clear_entries
+    @header_comments = nil
+    @footer_comments = nil
+  end
+
+  # Check if a line is a comment line (not an empty line!).
+  #
+  # @param line [String] line to check
+  #
+  # @return [Boolean] true if comment, false otherwise
+  #
+  def comment_line?(line)
+    line =~ /^\s*#{@comment_marker}.*/ ? true : false
+  end
+
+  # Create a new entry.
+  # Derived classes might choose to override this.
+  #
+  # @return [CommentedConfigFile::Entry] new entry
+  #
+  def create_entry
+    entry = Entry.new
+    entry.parent = self
+    entry
+  end
+
+  # Class representing one content line and the preceding comments.
+  #
+  # When subclassing this, don't forget to also overwrite
+  # CommentedConfigFile::create_entry!
+  #
+  class Entry
+    # @return [CommentedConfigFile] The parent CommentedConfigFile.
+    attr_accessor :parent
+
+    # @return [String] Content without any comment.
+    attr_accessor :content
+
+    # @return [String] Comment line(s) before the entry, terminated with a newline.
+    attr_accessor :comment_before
+
+    # @return [String] Comment on the same line as the entry without any newline.
+    attr_accessor :line_comment
+
+    def initialize
+      @parent = nil
+      @content = nil
+      @comment_before = nil
+      @line_comment = nil
+    end
+
+    def comment_before?
+      !@comment_before.nil? && !@comment_before.empty?
+    end
+
+    def line_comment?
+      !@line_comment.nil? && !@line_comment.empty?
+    end
+
+    # Parse a content line. This expects any line comment and the newline to be
+    # stripped off already.
+    #
+    # Derived classes might choose to override this.
+    #
+    # @param line [String] content line without any line comment
+    # @param line_no [Fixnum] line number for error reporting
+    #
+    # @return [Boolean] true if success, false if error
+    #
+    def parse(line, line_no = -1)
+      @content = line
+      true
+    end
+
+    # Format the content as a string.
+    # Derived classes might choose to override this.
+    # Do not add 'line_comment'; it is added by the caller.
+    #
+    # @return [String] formatted line without line comment.
+    #
+    def format
+      content
+    end
+
+    alias_method :to_s, :format
   end
 end
