@@ -32,6 +32,7 @@ def dump_footer_comments(file)
 end
 
 def dump_content(file)
+  puts
   puts("<Content>")
   file.entries.each_with_index do |entry, entry_no|
 
@@ -49,6 +50,7 @@ def dump_content(file)
     end
   end
   puts("</Content>")
+  puts
 end
 
 # main
