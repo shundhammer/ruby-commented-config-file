@@ -280,7 +280,7 @@ protected
   #
   def store_header_comments(lines)
     header_end = find_header_comment_end(lines)
-    @header_comments = lines.slice(0, header_end)
+    @header_comments = lines.slice(0, header_end + 1)
     header_end
   end
 
