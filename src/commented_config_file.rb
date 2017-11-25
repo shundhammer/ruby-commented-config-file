@@ -188,6 +188,7 @@ class CommentedConfigFile
     end
 
     lines.concat(@footer_comments) if footer_comments?
+    lines
   end
 
   # Format the complete file content into a single multi-line string.
