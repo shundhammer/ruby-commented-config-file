@@ -81,7 +81,7 @@ describe CommentedConfigFile do
   end
 
   context "Parser" do
-    describe "#line_comment?" do
+    describe "#comment_line?" do
       subject { described_class.new }
 
       context "with the default '#' comment marker" do
@@ -134,6 +134,58 @@ describe CommentedConfigFile do
           expect(subject.comment_line?("# foo")).to eq false
           expect(subject.comment_line?("")).to eq false
         end
+      end
+    end
+
+    describe "#empty_line?" do
+      subject { described_class.new }
+      
+      it "Detects a completely empty line" do
+        expect(subject.empty_line?("")).to eq true
+      end
+
+      it "Detects lines with only whitespace " do
+        expect(subject.empty_line?(" ")).to eq true
+        expect(subject.empty_line?("  ")).to eq true
+        expect(subject.empty_line?(" \n")).to eq true
+        expect(subject.empty_line?("\t")).to eq true
+        expect(subject.empty_line?("\t\n  \t\n")).to eq true
+      end
+
+      it "Rejects non-empty lines" do
+        expect(subject.empty_line?("x")).to eq false
+        expect(subject.empty_line?("  x")).to eq false
+        expect(subject.empty_line?("  x  ")).to eq false
+        expect(subject.empty_line?("  \nx  ")).to eq false
+      end
+    end
+
+    describe "#split_off_comment" do
+      subject { described_class.new }
+
+      it "Splits a simple line with a comment correctly" do
+        expect(subject.split_off_comment("foo = bar # baz")).to eq ["foo = bar", "# baz"]
+      end
+
+      it "Strips leading and trailing whitespace off the content" do
+        expect(subject.split_off_comment("  foo =  bar   # baz")).to eq ["foo =  bar", "# baz"]
+      end
+
+      it "Leaves whitespace in the comment alone" do
+        expect(subject.split_off_comment("foo = bar #  baz  ")).to eq ["foo = bar", "#  baz  "]
+      end
+
+      it "Handles lines without comments well" do
+        expect(subject.split_off_comment("foo = bar")).to eq ["foo = bar", nil]
+      end
+
+      it "Handles comment lines without content well" do
+        expect(subject.split_off_comment("# foo = bar")).to eq ["", "# foo = bar"]
+        expect(subject.split_off_comment("   # foo = bar")).to eq ["", "# foo = bar"]
+      end
+
+      it "Handles empty lines well" do
+        expect(subject.split_off_comment("")).to eq ["", nil]
       end
     end
   end

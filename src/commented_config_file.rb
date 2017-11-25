@@ -7,6 +7,8 @@
 # License: GPL V2
 #
 
+require "pp"
+
 # Utility class to read and write config files that might contain comments.
 # This class tries to preserve any existing comments and keep them together
 # with the content line immediately following them.
@@ -74,13 +76,13 @@ class CommentedConfigFile
   # @return [Array<Entry>] The config file entries.
   attr_accessor :entries
 
-  # @return [String] The header comments, terminated with a newline.
+  # @return [Array<String>] The header comments
   attr_accessor :header_comments
 
-  # @return [String] The footer comments, terminated with a newline.
+  # @return [Array<String>] The footer comments
   attr_accessor :footer_comments
 
-  # @return [String] The last filename content was read from.
+  # @return [String] The last filename that content was read from.
   attr_reader :filename
 
   # @return [String] The comment marker; "#" by default.
@@ -115,15 +117,114 @@ class CommentedConfigFile
   # Check if a line is a comment line (not an empty line!).
   #
   # @param line [String] line to check
-  #
   # @return [Boolean] true if comment, false otherwise
   #
   def comment_line?(line)
     line =~ /^\s*#{@comment_marker}.*/ ? true : false
   end
 
+  # Check if a line is an empty line, i.e. it is completely empty or it only
+  # contains whitespace.
+  #
+  # @param line [String] line to check
+  # @return [Boolean] true if empty, false otherwise
+  #
+  def empty_line?(line)
+    # /m : multi-line mode
+    # \z : end of string; different from $ (end of line) in multi-line strings.
+    line =~ /^\s*\z/m ? true : false
+  end
+
+  # Split a content line into the real content and any potential line comment:
+  # "foo = bar   # baz" -> ["foo=bar", "# baz"]
+  #
+  # The content is also stripped of any leading and trailing whitespace.
+  # The line comment, if present, contains the leading comment marker.
+  #
+  # @param line [String]
+  # @return [Array<String>] [content, comment]
+  #
+  def split_off_comment(line)
+    match = /^(.*)(#{comment_marker}.*)/.match(line)
+    return [line.strip, nil] if match.nil?
+
+    content = match[1]
+    comment = match[2]
+
+    [content.strip, comment]
+  end
+
+  # Parse lines: Split the file content up between header comment, content,
+  # footer content. Parse each content line, breaking it up into its comment
+  # before each entry, the content itself and the line comment.
+  #
+  def parse(lines)
+    clear_all
+    header_end = store_header_comments(lines)
+    footer_start = store_footer_comments(lines, header_end + 1)
+
+    # We need to just store the header and footer comments and leave 'lines'
+    # untouched so any error handling in the parser can return the real line
+    # numbers of an error; if we would split off the comments, those line
+    # numbers would be off.
+
+    parse_entries(lines, header_end + 1, footer_start - 1)
+  end
+
+  # Format the complete file content into separate lines, including header and
+  # footer comments. This is the reverse operation of 'parse'.
+  #
+  # @return [Array<String>] formatted content
+  #
+  def format_lines
+    lines = []
+    lines.concat(@header_comments) if header_comments?
+
+    entries.each do |entry|
+      lines.concat(entry.comment_before) if entry.comment_before?
+      content_line = entry.format
+      content_line += " " + entry.line_comment if entry.line_comment?
+      lines << content_line
+    end
+
+    lines.concat(@footer_comments) if footer_comments?
+  end
+
+  # Format the complete file content into a single multi-line string.
+  #
+  # @return [String] formatted content
+  #
+  def to_s
+    format_lines.join("\n")
+  end
+
+  # Read a file and parse it.
+  #
+  # @param filename [String]
+  #
+  def read(filename)
+    @filename = filename
+    lines = []
+    open(filename).each { |line| lines << line.chomp }
+    parse(lines)
+  end
+
+  # Write the stored content to a file. If no filename is specified, reuse the
+  # filename the content was read from.
+  #
+  # @param filename [String]
+  #
+  def write(filename = nil)
+    filename ||= @filename
+    open(filename, "w") do |file|
+      format_lines.each { |line| file.puts(line) }
+    end
+  end
+
   # Create a new entry.
-  # Derived classes might choose to override this.
+  #
+  # Derived classes might choose to override this and return an instance of
+  # their own entry class.
   #
   # @return [CommentedConfigFile::Entry] new entry
   #
@@ -132,6 +233,122 @@ class CommentedConfigFile
     entry.parent = self
     entry
   end
+
+protected
+
+  # Parse the entries in 'lines'. Header and footer comments should already
+  # removed from 'lines'.
+  #
+  # This will create a new Entry object for each content line and add it to the
+  # internal array of entries.
+  #
+  # @param lines [Array<String>]
+  # @param from [Fixnum] line number of the first line to parse
+  # @param to   [Fixnum] line number of the last  line to parse
+  #
+  # @return [Boolean] true if success, false if error
+  #
+  def parse_entries(lines, from, to)
+    clear_entries
+    comment_before = []
+    success = true
+
+    for i in from..to
+      line = lines[i]
+      if empty_line?(line) || comment_line?(line)
+        comment_before << line
+      else # found a content line
+        entry = create_entry;
+        entry.comment_before = comment_before unless comment_before.empty?
+        comment_before = []
+        content, entry.line_comment = split_off_comment(line)
+        if entry.parse(content)
+          @entries << entry
+        else
+          success = false
+        end
+      end
+    end
+    success
+  end
+
+  # Identify the header comments from 'lines' and store them in
+  # 'header_comments'. Leave 'lines' untouched.
+  #
+  # @param lines [Array<String>]
+  # @return [Fixnum] header end
+  #
+  def store_header_comments(lines)
+    header_end = find_header_comment_end(lines)
+    @header_comments = lines.slice(0, header_end)
+    header_end
+  end
+
+  # Identify the footer comments from 'lines' and store them in
+  # 'footer_comments'. Leave 'lines' untouched.
+  #
+  # @param lines [Array<String>]
+  # @return [Fixnum] footer start
+  #
+  def store_footer_comments(lines, from)
+    footer_start = find_footer_comment_start(lines, from)
+    footer_length = lines.size - footer_start
+    @footer_comments = lines.slice(footer_start, footer_length)
+    footer_start
+  end
+
+  # Find the line number of the end of the header comment.
+  #
+  # @param lines [Array<String>]
+  # @return [Fixnum] line number or -1 if there is no header comment
+  #
+  def find_header_comment_end(lines)
+    header_end = -1
+    last_empty_line = -1
+
+    lines.each_with_index do |line, i|
+      if empty_line?(line)
+        last_empty_line = i
+      elsif comment_line?(line)
+        header_end = i
+      else # found the first content line
+        break
+      end
+    end
+
+    if last_empty_line > 0
+      header_end = last_empty_line;
+      # This covers two cases:
+      #
+      # - If there were empty lines and no more comment lines before the
+      #   first content line, the empty lines belong to the header comment.
+      #
+      # - If there were empty lines and then some more comment lines before
+      #   the first content line, the comments after the last empty line no
+      #   longer belong to the header comment, but to the first content
+      #   entry. So let's go back to that last empty line.
+    end
+
+    header_end
+  end
+
+  # Find the line numer of the first line of the footer comment.
+  #
+  # @param lines [Array<String>]
+  # @return [Fixnum] line number or lines.size if there is no footer comment
+  #
+  def find_footer_comment_start(lines, from)
+    footer_start = lines.size
+
+    lines.reverse_each.each_with_index do |line, i|
+      break unless empty_line?(line) || comment_line?(line)
+      footer_start = lines.size - 1 - i
+    end
+
+    footer_start
+  end
+
+public
 
   # Class representing one content line and the preceding comments.
   #
@@ -145,10 +362,10 @@ class CommentedConfigFile
     # @return [String] Content without any comment.
     attr_accessor :content
 
-    # @return [String] Comment line(s) before the entry, terminated with a newline.
+    # @return [Array<String>] Comment lines before the entry.
     attr_accessor :comment_before
 
-    # @return [String] Comment on the same line as the entry without any newline.
+    # @return [String] Comment on the same line as the entry (without trailing newline).
     attr_accessor :line_comment
 
     def initialize
@@ -181,9 +398,8 @@ class CommentedConfigFile
       true
     end
 
-    # Format the content as a string.
+    # Format the content (without the line comment) as a string.
     # Derived classes might choose to override this.
-    # Do not add 'line_comment'; it is added by the caller.
     #
     # @return [String] formatted line without line comment.
     #
