@@ -9,31 +9,33 @@
 
 require_relative "../src/commented_config_file"
 
+# Get a grip on insane restrictions imposed by rubocop:
+#
+# rubocop:disable Metrics/AbcSize
+# rubocop:disable Metrics/MethodLength
+
 def usage
   $stderr.puts("\nUsage: ccf_demo <infile-name>\n\n")
   exit(1)
 end
 
 def dump_header_comments(file)
-  if file.header_comments?
-    puts("<Header>")
-    file.header_comments.each_with_index { |line, i| puts("  #{i + 1}: #{line}") }
-    puts("</Header>")
-  end
+  return unless file.header_comments?
+  puts("<Header>")
+  file.header_comments.each_with_index { |line, i| puts("  #{i + 1}: #{line}") }
+  puts("</Header>")
 end
 
 def dump_footer_comments(file)
-  if file.footer_comments?
-    puts("<Footer>")
-    file.footer_comments.each_with_index { |line, i| puts("  #{i + 1}: #{line}") }
-    puts("</Footer>")
-  end
+  return unless file.footer_comments?
+  puts("<Footer>")
+  file.footer_comments.each_with_index { |line, i| puts("  #{i + 1}: #{line}") }
+  puts("</Footer>")
 end
 
 def dump_content(file)
   puts("<Content>")
   file.entries.each_with_index do |entry, entry_no|
-
     if entry.comment_before?
       puts
       entry.comment_before.each_with_index do |line, line_no|

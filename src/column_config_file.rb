@@ -26,9 +26,16 @@ require "commented_config_file"
 # the more generic CommentedConfigFile class to handle such cases.
 #
 class ColumnConfigFile < CommentedConfigFile
+  # Get a grip on insane restrictions imposed by rubocop:
+  #
+  # rubocop:disable Style/For
+  # rubocop:disable Style/MutableConstant
+  # rubocop:disable Metrics/LineLength
+
   DEFAULT_MAX_COLUMN_WIDTH = 40
   DEFAULT_INPUT_DELIMITER = /\s+/
   DEFAULT_OUTPUT_DELIMITER = "  "
+  # rubocop:enable Style/MutableConstant
 
   # @return [Fixnum] the fallback value for the maximum column width if no
   # per-column value is specified for a column.
@@ -57,7 +64,6 @@ class ColumnConfigFile < CommentedConfigFile
   # @return [String] Output column delimiter; this is used when formatting
   # columns. The default is " " (two blanks).
   attr_accessor :output_delimiter
-
 
   # @return [Array<Fixnum>] The last column widths calculated.
   #
@@ -133,7 +139,7 @@ class ColumnConfigFile < CommentedConfigFile
     ColumnConfigFile::Entry.new(self)
   end
 
-protected
+  protected
 
   # Count the maximum number of columns amont all entries.
   #
@@ -160,15 +166,13 @@ protected
       # oversize column items should not be part of this calculation; we want
       # to know the widths of the "normal" items only.
 
-      if col.size > max_width && max_width >0
+      if col.size > max_width && max_width > 0
         old_max
       else
         [col.size, old_max].max
       end
     end
   end
-
-public
 
   # Class representing one content line with all its columns and the preceding
   # comments.
@@ -177,7 +181,6 @@ public
   # ColumnConfigFile::create_entry!
   #
   class Entry < CommentedConfigFile::Entry
-
     attr_accessor :columns
 
     # Constructor. Notice that while the parent class does not really do
@@ -228,10 +231,11 @@ public
     #
     # This default implementation does nothing.
     #
+    # rubocop:disable Style/EmptyMethod
     def populate_columns
     end
 
-  protected
+    protected
 
     # Return the column delimiter used for input (parsing).
     #
@@ -261,7 +265,7 @@ public
       col = @columns[column_no]
       return col unless parent && parent.respond_to?(:pad_columns)
       return col unless parent.pad_columns
-      col.ljust(parent.get_column_width(column_no), ' ')
+      col.ljust(parent.get_column_width(column_no), " ")
     end
   end
 end

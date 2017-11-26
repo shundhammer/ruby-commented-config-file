@@ -8,9 +8,14 @@
 #
 
 SRC_PATH = File.expand_path("../../src", __FILE__)
-$LOAD_PATH << SRC_PATH 
+$LOAD_PATH << SRC_PATH
 
 require_relative "../src/column_config_file"
+
+# Get a grip on insane restrictions imposed by rubocop:
+#
+# rubocop:disable Metrics/AbcSize
+# rubocop:disable Metrics/MethodLength
 
 def usage
   $stderr.puts("\nUsage: col_demo <infile-name>\n\n")
@@ -18,25 +23,22 @@ def usage
 end
 
 def dump_header_comments(file)
-  if file.header_comments?
-    puts("<Header>")
-    file.header_comments.each_with_index { |line, i| puts("  #{i + 1}: #{line}") }
-    puts("</Header>")
-  end
+  return unless file.header_comments?
+  puts("<Header>")
+  file.header_comments.each_with_index { |line, i| puts("  #{i + 1}: #{line}") }
+  puts("</Header>")
 end
 
 def dump_footer_comments(file)
-  if file.footer_comments?
-    puts("<Footer>")
-    file.footer_comments.each_with_index { |line, i| puts("  #{i + 1}: #{line}") }
-    puts("</Footer>")
-  end
+  return unless file.footer_comments?
+  puts("<Footer>")
+  file.footer_comments.each_with_index { |line, i| puts("  #{i + 1}: #{line}") }
+  puts("</Footer>")
 end
 
 def dump_content(file)
   puts("<Content>")
   file.entries.each_with_index do |entry, entry_no|
-
     puts("  <Entry  ##{entry_no + 1}>")
     if entry.comment_before?
       entry.comment_before.each_with_index do |line, line_no|
@@ -46,7 +48,7 @@ def dump_content(file)
     end
 
     entry.columns.each_with_index do |col, col_no|
-        puts("    Entry ##{entry_no + 1} col ##{col_no + 1}: #{col}")
+      puts("    Entry ##{entry_no + 1} col ##{col_no + 1}: #{col}")
     end
 
     if entry.line_comment?

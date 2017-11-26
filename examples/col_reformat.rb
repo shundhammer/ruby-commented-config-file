@@ -8,7 +8,7 @@
 #
 
 SRC_PATH = File.expand_path("../../src", __FILE__)
-$LOAD_PATH << SRC_PATH 
+$LOAD_PATH << SRC_PATH
 
 require_relative "../src/column_config_file"
 
@@ -16,7 +16,6 @@ def usage
   $stderr.puts("\nUsage: col_reformat <infile-name>\n\n")
   exit(1)
 end
-
 
 # main
 

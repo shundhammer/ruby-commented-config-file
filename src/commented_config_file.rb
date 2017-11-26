@@ -7,6 +7,15 @@
 # License: GPL V2
 #
 
+# Get a grip on insane restrictions imposed by rubocop:
+#
+# rubocop:disable Metrics/AbcSize
+# rubocop:disable Metrics/PerceivedComplexity
+# rubocop:disable Metrics/MethodLength
+# rubocop:disable Style/Alias
+# rubocop:disable Style/For
+# rubocop:disable Metrics/ClassLength
+
 # Utility class to read and write config files that might contain comments.
 # This class tries to preserve any existing comments and keep them together
 # with the content line immediately following them.
@@ -99,7 +108,7 @@ class CommentedConfigFile
   end
 
   def footer_comments?
-    !@footer_comments.nil? && ! @footer_comments.empty?
+    !@footer_comments.nil? && !@footer_comments.empty?
   end
 
   def clear_entries
@@ -231,7 +240,7 @@ class CommentedConfigFile
     Entry.new(self)
   end
 
-protected
+  protected
 
   # Parse the entries in 'lines'. Header and footer comments should already
   # removed from 'lines'.
@@ -255,7 +264,7 @@ protected
       if empty_line?(line) || comment_line?(line)
         comment_before << line
       else # found a content line
-        entry = create_entry;
+        entry = create_entry
         entry.comment_before = comment_before unless comment_before.empty?
         comment_before = []
         content, entry.line_comment = split_off_comment(line)
@@ -314,7 +323,7 @@ protected
     end
 
     if last_empty_line > 0
-      header_end = last_empty_line;
+      header_end = last_empty_line
       # This covers two cases:
       #
       # - If there were empty lines and no more comment lines before the
@@ -337,15 +346,14 @@ protected
   def find_footer_comment_start(lines, from)
     footer_start = lines.size
 
-    lines.reverse_each.each_with_index do |line, i|
+    lines.reverse_each.each_with_index do |line, line_no|
+      break if line_no < from
       break unless empty_line?(line) || comment_line?(line)
-      footer_start = lines.size - 1 - i
+      footer_start = lines.size - 1 - line_no
     end
 
     footer_start
   end
-
-public
 
   # Class representing one content line and the preceding comments.
   #

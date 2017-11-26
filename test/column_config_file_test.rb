@@ -9,6 +9,9 @@
 require_relative "support/spec_helper"
 require "column_config_file"
 
+# rubocop:disable Lint/AmbiguousRegexpLiteral
+# rubocop:disable Metrics/BlockLength
+
 describe ColumnConfigFile do
   context "Parser" do
     describe "#parse" do

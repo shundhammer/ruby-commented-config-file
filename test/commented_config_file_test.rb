@@ -9,8 +9,12 @@
 require_relative "support/spec_helper"
 require "commented_config_file"
 
-describe CommentedConfigFile do
+# rubocop:disable Lint/AmbiguousRegexpLiteral
+# rubocop:disable Style/RegexpLiteral
+# rubocop:disable Metrics/BlockLength
+# rubocop:disable Metrics/LineLength
 
+describe CommentedConfigFile do
   context "when created empty" do
     subject { described_class.new }
 
@@ -37,7 +41,7 @@ describe CommentedConfigFile do
   end
 
   describe "#Entry.new" do
-    let (:entry) { subject.create_entry }
+    let(:entry) { subject.create_entry }
 
     it "is empty" do
       expect(entry.content).to be_nil
@@ -52,12 +56,13 @@ describe CommentedConfigFile do
     end
 
     it "has the correct parent" do
+      # rubocop:disable Style/CaseEquality
       expect(entry.parent).to be === subject
     end
   end
 
   describe "#Entry.parse" do
-    let (:ccf) { described_class.new}
+    let(:ccf) { described_class.new }
     subject { ccf.create_entry }
 
     it "stores the content" do
@@ -67,7 +72,7 @@ describe CommentedConfigFile do
   end
 
   describe "#Entry.format" do
-    let (:ccf) { described_class.new}
+    let(:ccf) { described_class.new }
     subject { ccf.create_entry }
 
     it "formats the content without comments" do
