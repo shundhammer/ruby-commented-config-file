@@ -48,6 +48,7 @@ class ColumnConfigFile < CommentedConfigFile
   attr_reader :column_widths
 
   def initialize
+    super
     @max_column_widths = []
     @fallback_max_column_width = DEFAULT_MAX_COLUMN_WIDTH
     @pad_columns = true
