@@ -37,7 +37,7 @@ def dump_content(file)
   puts("<Content>")
   file.entries.each_with_index do |entry, entry_no|
 
-    puts("  <Entry ##{entry_no + 1}>")
+    puts("  <Entry  ##{entry_no + 1}>")
     if entry.comment_before?
       entry.comment_before.each_with_index do |line, line_no|
         puts("    Entry ##{entry_no + 1} comment #{line_no + 1}: #{line}")
@@ -46,7 +46,7 @@ def dump_content(file)
     end
 
     entry.columns.each_with_index do |col, col_no|
-        puts("    Entry ##{entry_no + 1} col ##{col_no}: #{col}")
+        puts("    Entry ##{entry_no + 1} col ##{col_no + 1}: #{col}")
     end
 
     if entry.line_comment?
