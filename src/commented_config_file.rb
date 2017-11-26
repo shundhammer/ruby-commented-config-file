@@ -400,7 +400,7 @@ public
     #
     # @return [Boolean] true if success, false if error
     #
-    def parse(line, line_no = -1)
+    def parse(line, _line_no = -1)
       @content = line
       true
     end
