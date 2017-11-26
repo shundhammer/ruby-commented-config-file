@@ -230,9 +230,7 @@ class CommentedConfigFile
   # @return [CommentedConfigFile::Entry] new entry
   #
   def create_entry
-    entry = Entry.new
-    entry.parent = self
-    entry
+    Entry.new(self)
   end
 
 protected
@@ -254,8 +252,8 @@ protected
     comment_before = []
     success = true
 
-    for i in from..to
-      line = lines[i]
+    for line_no in from..to
+      line = lines[line_no]
       if empty_line?(line) || comment_line?(line)
         comment_before << line
       else # found a content line
@@ -263,7 +261,7 @@ protected
         entry.comment_before = comment_before unless comment_before.empty?
         comment_before = []
         content, entry.line_comment = split_off_comment(line)
-        if entry.parse(content)
+        if entry.parse(content, line_no)
           @entries << entry
         else
           success = false
@@ -358,6 +356,9 @@ public
   #
   class Entry
     # @return [CommentedConfigFile] The parent CommentedConfigFile.
+    #
+    # While this base class does not really use the parent, derived classes
+    # will so they can access data from their parent config file.
     attr_accessor :parent
 
     # @return [String] Content without any comment.
@@ -366,11 +367,16 @@ public
     # @return [Array<String>] Comment lines before the entry.
     attr_accessor :comment_before
 
-    # @return [String] Comment on the same line as the entry (without trailing newline).
+    # @return [String] Comment on the same line as the entry (without trailing
+    # newline).
     attr_accessor :line_comment
 
-    def initialize
-      @parent = nil
+    # Constructor.
+    #
+    # @param parent [CommentedConfigFile]
+    #
+    def initialize(parent = nil)
+      @parent = parent
       @content = nil
       @comment_before = nil
       @line_comment = nil
