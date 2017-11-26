@@ -8,7 +8,6 @@
 #
 
 require_relative "../src/commented_config_file"
-require "pp"
 
 def usage
   $stderr.puts("\nUsage: ccf_demo <infile-name>\n\n")

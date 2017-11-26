@@ -7,8 +7,6 @@
 # License: GPL V2
 #
 
-require "pp"
-
 # Utility class to read and write config files that might contain comments.
 # This class tries to preserve any existing comments and keep them together
 # with the content line immediately following them.

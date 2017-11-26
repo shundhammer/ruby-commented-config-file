@@ -11,7 +11,6 @@ SRC_PATH = File.expand_path("../../src", __FILE__)
 $LOAD_PATH << SRC_PATH 
 
 require_relative "../src/column_config_file"
-require "pp"
 
 def usage
   $stderr.puts("\nUsage: col_reformat <infile-name>\n\n")
