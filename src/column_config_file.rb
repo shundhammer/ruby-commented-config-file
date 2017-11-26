@@ -36,7 +36,7 @@ class ColumnConfigFile < CommentedConfigFile
   # @return [Array<Fixnum>] Per-column maximum width for each column. If not
   # specified for a column, 'fallback_max_column_width' is used.
   #
-  attr_accessor :max_column_width
+  attr_accessor :max_column_widths
 
   # @return [Boolean] Flag: Pad the columns to a common width (up to each
   # column's maximum width) or not?
@@ -102,7 +102,6 @@ class ColumnConfigFile < CommentedConfigFile
     for col in 0...count_max_columns
       @column_widths[col] = calc_column_width(col)
     end
-
     @column_widths
   end
 
@@ -146,7 +145,7 @@ protected
       if col.size > max_width && max_width >0
         old_max
       else
-        [col_size, old_max].max
+        [col.size, old_max].max
       end
     end
   end
@@ -169,6 +168,7 @@ public
     # @param parent [ColumnConfigFile]
     #
     def initialize(parent)
+      super
       @columns = []
     end
 
@@ -222,7 +222,7 @@ public
     # @return [String] padded column text
     #
     def pad_column(column_no)
-      col = @column[column_no]
+      col = @columns[column_no]
       return col unless parent && parent.respond_to?(:pad_columns)
       return col unless parent.pad_columns
       col.ljust(parent.get_column_width(column_no), ' ')

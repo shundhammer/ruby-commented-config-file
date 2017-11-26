@@ -27,5 +27,5 @@
 nas:/share/sh                /nas/sh          nfs   bg,intr,soft,retry=6       0  0
 nas:/share/work              /nas/work        nfs   bg,intr,soft,retry=6       0  0
 
-//fritz.box/fritz.nas/  /fritz.nas  cifs  credentials=/work/home/sh/.private/fritz-nas-credentials.txt,uid=sh,forceuid,gid=users,forcegid  0  0
+//fritz.box/fritz.nas/       /fritz.nas       cifs  credentials=/work/home/sh/.private/fritz-nas-credentials.txt,uid=sh,forceuid,gid=users,forcegid  0  0
 
