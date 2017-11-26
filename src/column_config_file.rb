@@ -27,6 +27,8 @@ require "commented_config_file"
 #
 class ColumnConfigFile < CommentedConfigFile
   DEFAULT_MAX_COLUMN_WIDTH = 40
+  DEFAULT_INPUT_DELIMITER = /\s+/
+  DEFAULT_OUTPUT_DELIMITER = "  "
 
   # @return [Fixnum] the fallback value for the maximum column width if no
   # per-column value is specified for a column.
@@ -43,6 +45,20 @@ class ColumnConfigFile < CommentedConfigFile
   #
   attr_accessor :pad_columns
 
+  # @return [Regexp] Input column delimiter, used for parsing content lines.
+  # This is usually one or more whitespace characters, but it might also be
+  # something completely different like one colon for /etc/passwd.
+  #
+  # If this is non-blank, pad_columns should probably also set to 'false'
+  # because it will always pad with blanks which would probably not be
+  # appropriate for that file format.
+  attr_accessor :input_delimiter
+
+  # @return [String] Output column delimiter; this is used when formatting
+  # columns. The default is " " (two blanks).
+  attr_accessor :output_delimiter
+
+
   # @return [Array<Fixnum>] The last column widths calculated.
   #
   attr_reader :column_widths
@@ -52,6 +68,8 @@ class ColumnConfigFile < CommentedConfigFile
     @max_column_widths = []
     @fallback_max_column_width = DEFAULT_MAX_COLUMN_WIDTH
     @pad_columns = true
+    @input_delimiter = DEFAULT_INPUT_DELIMITER
+    @output_delimiter = DEFAULT_OUTPUT_DELIMITER
     @column_widths = []
   end
 
@@ -184,7 +202,7 @@ public
     #
     def parse(line, _line_no = -1)
       super
-      @columns = line.split(/\s+/)
+      @columns = line.split(input_delimiter)
       true
     end
 
@@ -198,7 +216,7 @@ public
     def format
       line = ""
       @columns.each_with_index do |_col, i|
-        line << "  " unless line.empty?
+        line << output_delimiter unless line.empty?
         line << pad_column(i)
       end
       line
@@ -213,7 +231,25 @@ public
     def populate_columns
     end
 
-  private
+  protected
+
+    # Return the column delimiter used for input (parsing).
+    #
+    # @return [Regexp] delimiter
+    #
+    def input_delimiter
+      return DEFAULT_INPUT_DELIMITER unless parent && parent.respond_to?(:input_delimiter)
+      parent.input_delimiter
+    end
+
+    # Return the column delimiter used for output, usually two blanks.
+    #
+    # @return [String] delimiter
+    #
+    def output_delimiter
+      return DEFAULT_OUTPUT_DELIMITER unless parent && parent.respond_to?(:output_delimiter)
+      parent.output_delimiter
+    end
 
     # Pad column no. 'column_no' to the desired witdh.
     #
