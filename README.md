@@ -41,7 +41,7 @@ so moving around entries in the file will keep the comment with the content
 line it belongs to.
 
 The default comment marker is '#' like in most Linux config files, but it
-can be set with setCommentMarker().
+can be configured with comment_marker = "...".
 
 ## Example
 
