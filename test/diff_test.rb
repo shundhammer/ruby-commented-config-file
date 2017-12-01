@@ -8,9 +8,22 @@
 
 require_relative "support/spec_helper"
 require "diff"
+require "pp"
 
-# rubocop:disable Lint/AmbiguousRegexpLiteral
-# rubocop:disable Metrics/BlockLength
+def read_file(filename)
+  lines = []
+  open(filename).each { |line| lines << line.chomp }
+  lines
+end
+
+def read_files(prefix, pattern)
+  path = "data/diff/"
+  filenames = Dir.glob(path + prefix + pattern).sort
+  filenames.each_with_object({}) do |filename, hash|
+    name = filename.gsub(path + prefix, "")
+    hash[name] = read_file(filename)
+  end
+end
 
 describe Diff do
   context "Simple diffs without context" do
@@ -48,6 +61,29 @@ describe Diff do
 
       it "detects multiple added lines" do
         expect(Diff::diff(aaa, ccc, 0)).to eq ["@@ -1,0 +2,2 @@", "+bbb", "+ccc"]
+      end
+    end
+  end
+
+  context "Advanced diffs with context" do
+    describe "#diff" do
+      input = read_files("input", "??")
+      expected = read_files("expected_", "??_??")
+      expected.each do |key, value|
+        # kill any lines starting with +++ or --- that "diff -u" left behind
+        value.delete_if { |line| line =~ /^(\+\+\+|---)/ }
+      end
+
+      let(:context_lines) { 3 }
+
+      expected.each do |key, expected_lines|
+        name_a, name_b = key.split("_")
+        
+        it "Correctly diffs input#{name_a} against input#{name_b}" do
+          lines_a = input[name_a]
+          lines_b = input[name_b]
+          expect(Diff::diff(lines_a, lines_b, context_lines)).to eq expected_lines
+        end
       end
     end
   end
