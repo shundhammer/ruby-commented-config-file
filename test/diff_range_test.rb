@@ -9,8 +9,9 @@
 require_relative "support/spec_helper"
 require "diff_range"
 
-# rubocop:disable Lint/AmbiguousRegexpLiteral
 # rubocop:disable Metrics/BlockLength
+# rubocop:disable Style/NumericPredicate
+# rubocop:disable Style/WordArray
 
 describe DiffRange do
   describe "#new" do
@@ -54,7 +55,7 @@ describe DiffRange do
 
   describe "#create" do
     context "created from an array" do
-      let(:array) { [ "aaa", "bbb", "ccc", "ddd" ] }
+      let(:array) { ["aaa", "bbb", "ccc", "ddd"] }
       subject { DiffRange.create(array) }
 
       it "has the correct first and last" do
@@ -98,7 +99,7 @@ describe DiffRange do
   end
 
   describe "#skip_first" do
-    let(:array) { [ "aaa", "bbb", "ccc", "ddd" ] }
+    let(:array) { ["aaa", "bbb", "ccc", "ddd"] }
     subject { DiffRange.create(array) }
 
     it "correctly skips the first position" do
@@ -125,7 +126,7 @@ describe DiffRange do
   end
 
   describe "#skip_last" do
-    let(:array) { [ "aaa", "bbb", "ccc", "ddd" ] }
+    let(:array) { ["aaa", "bbb", "ccc", "ddd"] }
     subject { DiffRange.create(array) }
 
     it "correctly skips the last position" do

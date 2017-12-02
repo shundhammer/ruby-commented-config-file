@@ -10,11 +10,14 @@
 # Get a grip on insane restrictions imposed by rubocop:
 #
 # rubocop:disable Metrics/AbcSize
+# rubocop:disable Metrics/CyclomaticComplexity
 # rubocop:disable Metrics/PerceivedComplexity
+# rubocop:disable Metrics/LineLength
+# rubocop:disable Metrics/BlockLength
 # rubocop:disable Metrics/MethodLength
-# rubocop:disable Style/Alias
-# rubocop:disable Style/For
 # rubocop:disable Metrics/ClassLength
+# rubocop:disable Style/NegatedIf
+# rubocop:disable Style/Next
 
 require "diff_range"
 require "diff_hunk"
@@ -75,7 +78,7 @@ class Diff
   # @return [Array<String>]
   #
   def self.format_patch_header(filename_old, filename_new)
-    [ "--- #{filename_old}", "+++ #{filename_new}" ]
+    ["--- #{filename_old}", "+++ #{filename_new}"]
   end
 
   # Format the hunks. This also merges overlapping hunks (but just for the
@@ -117,7 +120,7 @@ class Diff
       if !merging
         if !merged_lines.empty?
           # Flush pending merged lines
-          result << Hunk::format_header(merged_range_a, merged_range_b)
+          result << Hunk.format_header(merged_range_a, merged_range_b)
           result.concat(merged_lines)
           merged_lines = []
         else
@@ -129,7 +132,7 @@ class Diff
     result
   end
 
-protected
+  protected
 
   # Diff lines_a against lines_b between ranges a and b and store the result in
   # the internal hunks.
@@ -141,16 +144,16 @@ protected
     skip_common_start(a, b)
     skip_common_end(a, b)
 
-    if !a.empty? || !b.empty?
-      (pos_a, pos_b, len) = find_common_subsequence(a, b)
+    return if a.empty? && b.empty?
 
-      if len > 0
-        # Cut into two parts and recurse
-        diff( DiffRange.new(a.first, pos_a - 1), DiffRange.new(b.first, pos_b - 1) )
-        diff( DiffRange.new(pos_a + len, a.last), DiffRange.new(pos_b + len, b.last) )
-      else
-        add_hunk(a, b)
-      end
+    (pos_a, pos_b, len) = find_common_subsequence(a, b)
+
+    if len > 0
+      # Cut into two parts and recurse
+      diff(DiffRange.new(a.first, pos_a - 1), DiffRange.new(b.first, pos_b - 1))
+      diff(DiffRange.new(pos_a + len, a.last), DiffRange.new(pos_b + len, b.last))
+    else
+      add_hunk(a, b)
     end
   end
 
@@ -206,12 +209,12 @@ protected
         end
 
         len = i - pos_a
+        next if len <= best_len # This sequence is no better than the old one
 
-        if len > best_len # This sequence is longer than the old one
-          best_len = len
-          best_pos_a = pos_a
-          best_pos_b = pos_b
-        end
+        # Found a new best sequence, so let's store it
+        best_len = len
+        best_pos_a = pos_a
+        best_pos_b = pos_b
       end
     end
 
@@ -250,7 +253,7 @@ protected
   # @param a [DiffRange]
   # @param b [DiffRange]
   #
-  def add_context_before(hunk, a, b)
+  def add_context_before(hunk, a, _b)
     return unless a.first > 0
     context = DiffRange.new
     context.first = [0, a.first - @context_lines].max
@@ -264,7 +267,7 @@ protected
   # @param a [DiffRange]
   # @param b [DiffRange]
   #
-  def add_context_after(hunk, a, b)
+  def add_context_after(hunk, a, _b)
     return unless a.last < @lines_a.size - 1
     context = DiffRange.new
     context.first = [@lines_a.size - 1, a.last + 1].min
@@ -283,7 +286,7 @@ protected
       current_first = hunk.removed_range.first
       overlap = prev_last - current_first + 1
       remove_hunk_overlap(prev_hunk.context_lines_after,
-        hunk.context_lines_before, overlap)
+                          hunk.context_lines_before, overlap)
     end
   end
 
@@ -300,6 +303,7 @@ protected
         prev_context.pop
         overlap -= 1
       end
+
       if overlap > 0 && !current_context.empty?
         # Remove the first line from the context of the current hunk
         current_context.shift
