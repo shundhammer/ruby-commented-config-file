@@ -92,11 +92,11 @@ class Diff
     #
     def self.format_header(a, b)
       result = "@@ -"
-      result += a.empty? ? "1,0" : "#{a.first + 1}"
-      result += ",#{a.length}" if a.length > 1
+      result += a.empty? ? "1" : "#{a.first + 1}"
+      result += ",#{a.length}" if a.length != 1
       result += " +"
-      result += b.empty? ? "1,0" : "#{b.first + 1}"
-      result += ",#{b.length}" if b.length > 1
+      result += b.empty? ? "1" : "#{b.first + 1}"
+      result += ",#{b.length}" if b.length != 1
       result += " @@"
     end
 

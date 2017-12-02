@@ -145,7 +145,7 @@ protected
       (pos_a, pos_b, len) = find_common_subsequence(a, b)
 
       if len > 0
-        # Cut in two parts and recurse
+        # Cut into two parts and recurse
         diff( DiffRange.new(a.first, pos_a - 1), DiffRange.new(b.first, pos_b - 1) )
         diff( DiffRange.new(pos_a + len, a.last), DiffRange.new(pos_b + len, b.last) )
       else
@@ -227,8 +227,8 @@ protected
     hunk = Hunk.new
     hunk.lines_removed = @lines_a.slice(a.first, a.length)
     hunk.lines_added = @lines_b.slice(b.first, b.length)
-    hunk.removed_start_pos = a.first
-    hunk.added_start_pos = b.first
+    hunk.removed_start_pos = @lines_a.empty? ? -1 : a.first
+    hunk.added_start_pos   = @lines_b.empty? ? -1 : b.first
     add_context(hunk, a, b)
     @hunks << hunk
   end
