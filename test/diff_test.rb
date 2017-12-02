@@ -79,7 +79,7 @@ describe Diff do
       expected.each do |key, expected_lines|
         name_a, name_b = key.split("_")
         
-        it "Correctly diffs input#{name_a} against input#{name_b}" do
+        it "correctly diffs input#{name_a} against input#{name_b}" do
           lines_a = input[name_a]
           lines_b = input[name_b]
           expect(Diff::diff(lines_a, lines_b, context_lines)).to eq expected_lines

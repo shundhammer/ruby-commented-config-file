@@ -44,7 +44,7 @@ class Diff
     @hunks = []
 
     diff(DiffRange.create(@lines_a), DiffRange.create(@lines_b))
-    # fix_hunk_overlap
+    fix_hunk_overlap
   end
 
   # Diff two sets of lines.
@@ -228,6 +228,7 @@ protected
     context = DiffRange.new
     context.first = [@lines_a.size - 1, a.last + 1].min
     context.last  = [@lines_a.size - 1, a.last + @context_lines].min
+    hunk.context_lines_after = @lines_a.slice(context.first, context.length)
   end
 
   # Make sure hunks don't overlap because of context lines:
