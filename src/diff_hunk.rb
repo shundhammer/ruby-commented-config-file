@@ -50,6 +50,10 @@ class Diff
     end
 
     # Format this hunk like in the "diff -u" command.
+    #
+    # Notice that unlike Diff::format_hunks, this does not attempt to merge
+    # consecutive hunks while formatting.
+    #
     # @return [Array<String>]
     #
     def format
@@ -76,9 +80,17 @@ class Diff
     # @return [String]
     #
     def format_header
-      a = removed_range
-      b = added_range
+      Hunk.format_header(removed_range, added_range)
+    end
 
+    # Format a hunk header.
+    #
+    # @param a [DiffRange]
+    # @param b [DiffRange]
+    #
+    # @return [String]
+    #
+    def self.format_header(a, b)
       result = "@@ -"
       result += a.empty? ? "1,0" : "#{a.first + 1}"
       result += ",#{a.length}" if a.length > 1

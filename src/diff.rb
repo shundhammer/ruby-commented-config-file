@@ -78,13 +78,54 @@ class Diff
     [ "--- #{filename_old}", "+++ #{filename_new}" ]
   end
 
-  # Format the hunks.
+  # Format the hunks. This also merges overlapping hunks (but just for the
+  # output).
   #
   # @return [Array<String>]
   #
   def format_hunks
     result = []
-    @hunks.each { |hunk| result.concat(hunk.format) }
+    merged_lines = []
+    merged_range_a = DiffRange.new
+    merged_range_b = DiffRange.new
+
+    @hunks.each_with_index do |hunk, i|
+      merging = false
+
+      if i < @hunks.size - 1
+        current_last = hunk.removed_range.last
+        next_first = @hunks[i + 1].removed_range.first
+
+        merging = true if current_last + 1 >= next_first
+      end
+
+      if merging || !merged_lines.empty?
+        range_a = hunk.removed_range.dup
+        range_b = hunk.added_range.dup
+
+        if merged_lines.empty?
+          merged_range_a.first = range_a.first
+          merged_range_b.first = range_b.first
+        end
+
+        merged_range_a.last = range_a.last
+        merged_range_b.last = range_b.last
+
+        merged_lines.concat(hunk.format_lines)
+      end
+
+      if !merging
+        if !merged_lines.empty?
+          # Flush pending merged lines
+          result << Hunk::format_header(merged_range_a, merged_range_b)
+          result.concat(merged_lines)
+          merged_lines = []
+        else
+          result.concat(hunk.format)
+        end
+      end
+    end
+
     result
   end
 
