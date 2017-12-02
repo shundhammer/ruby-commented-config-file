@@ -346,10 +346,11 @@ class CommentedConfigFile
   def find_footer_comment_start(lines, from)
     footer_start = lines.size
 
-    lines.reverse_each.each_with_index do |line, line_no|
+    lines.reverse_each.each_with_index do |line, i|
+      line_no = lines.size - 1 - i
       break if line_no < from
       break unless empty_line?(line) || comment_line?(line)
-      footer_start = lines.size - 1 - line_no
+      footer_start = line_no
     end
 
     footer_start
