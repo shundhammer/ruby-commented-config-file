@@ -8,13 +8,10 @@ License: GPL V2
 
 - CommentedConfigFile class
 - ColumnConfigFile class
+- Generic Diff class for string arrays
 
-This is a Ruby clone of my 
+This is a Ruby clone of my
 [C++ CommentedConfigFile class](https://github.com/shundhammer/commented-config-file).
-
-**_TO DO_**
-
-_- Generic Diff class for string arrays_
 
 
 
@@ -158,3 +155,10 @@ into the columns.
 The content lines may all have the same number of columns (like in
 `/etc/fstab`), or they might have different numbers of columns.
 
+
+## Diff
+
+This class performs diffs just like the Linux/Unix `diff -u` command.
+
+It operates on string arrays to make it useful in many places where you might
+want to get a diff to write it to a log file.
