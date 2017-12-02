@@ -33,6 +33,6 @@ filename_b = ARGV[1]
 lines_a = read(filename_a)
 lines_b = read(filename_b)
 
-diff_lines = Diff::diff(lines_a, lines_b)
+diff_lines = Diff.diff(lines_a, lines_b)
 
 puts diff_lines.join("\n")
