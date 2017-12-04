@@ -133,35 +133,57 @@ class EtcFstab < ColumnConfigFile
   # correct order.
   #
   # For example, if an entry for /var/lib/myapp appears before the entry for
-  # /var/lib, the /var/lib would shadow /var/lib/myapp. This method fixes this.
+  # /var/lib, the /var/lib would shadow /var/lib/myapp. This method fixes this
+  # if possible.
+  #
+  # Notice that it is still possible that some problems cannot be fixed (in
+  # which case this method returns 'false'): For example, if somebody edited
+  # /etc/fstab manually and added the same mount point for two entries. This is
+  # wrong, but this cannot be fixed automatically (we'd have to decide which
+  # one to remove). Don't call this again and again if there are such unfixable
+  # problems.
+  #
+  # @return [Boolean] 'true' if all problems are fixed, 'false' if not
   #
   def fix_mount_order
+    reordered = []
     start_index = 0
+    success = true
+
     while start_index < @entries.size
+      # problem_index = next_mount_order_problem(start_index)
       problem_index = next_mount_order_problem(start_index)
-      return if problem_index == -1 # No more problem -> we are finished.
+      return success if problem_index == -1 # No more problem -> we are finished.
 
-      # Take this entry out of the entries and put it back at the correct
-      # place.
-      entry = @entries.delete_at(problem_index)
-      add_entry(entry)
+      entry = @entries[problem_index]
+      if reordered.include?(entry)
+        # We already reordered this entry. This should not happen, but now we
+        # have to prevent an endless loop; so let's skip over this entry now.
+        start_index = problem_index + 1
+        success = false
 
-      # By definition, the entries vector is now fixed up to this index, so
-      # continue fixing at the next index.
-      start_index = problem_index + 1
+        # There is one pathological case where this could happen:
+        #
+        # When two or more entries have the same mount point (which is illegal,
+        # but somebody might write such an fstab manuallly), there is no
+        # correct mount order; this algorithm would get into an endless loop if
+        # we now checked the same index again. But by just proceeding with the
+        # next one (and silently assuming that the one we just changed is well
+        # and truly fixed), we can avoid that endless loop.
+        #
+        # The fstab is of course still incorrect, but there is nothing we can
+        # do about that at this point.
+      else
+        # Take this entry out of the entries and put it back at the correct
+        # place.
+        @entries.delete_at(problem_index)
+        add_entry(entry)
 
-      # There is one pathological case, though:
-      #
-      # When two or more entries have the same mount point (which is illegal,
-      # but somebody might write such an fstab manuallly), there is no correct
-      # mount order; this algorithm would get into an endless loop if we now
-      # checked the same index again. But by just proceeding with the next one
-      # (and silently assuming that the one we just changed is well and truly
-      # fixed), we can avoid that endless loop.
-      #
-      # The fstab is of course still incorrect, but there is nothing we can do
-      # about that at this point.
+        # Keep track of the reordered entries to avoid an endless loop
+        reordered << entry
+      end
     end
+    success
   end
 
   # Find the the entry index of the next mount order problem starting from
@@ -172,7 +194,8 @@ class EtcFstab < ColumnConfigFile
   # @return [Fixnum] Next problematic entry index or -1 if no more problems
   #
   def next_mount_order_problem(start_index = 0)
-    @entries.drop(start_index).each_with_index do |entry, index|
+    @entries.each_with_index do |entry, index|
+      next if index < start_index
       sort_index = find_sort_index(entry)
       next if sort_index == -1
       return index if sort_index < index
@@ -237,7 +260,10 @@ class EtcFstab < ColumnConfigFile
   # @return [String] String with space characters replaced by \040
   #
   def self.fstab_encode(unencoded)
-    unencoded.gsub(" ", "\\040")
+    unencoded.gsub(" ", '\\\\040')
+    # We need four (!) backslashes here because otherwise gsub will assume this
+    # is a back-reference to a grouped regexp part in the search expression:
+    # \\1 would be the first (..) group, \\2 the second etc.
   end
 
   # Decode an fstab entry. This is the inverse operation to fstab_encode.
@@ -246,7 +272,9 @@ class EtcFstab < ColumnConfigFile
   # @return [String] String with \040 replaced by a space character each
   #
   def self.fstab_decode(encoded)
-    encoded.gsub("\\040", " ")
+    encoded.gsub('\\040', " ")
+    # Unlike in fstab_encode, only two backslashes are needed here because it
+    # is in the original expression, so it cannot be a back-reference.
   end
 
   # Create a new entry.
@@ -309,7 +337,7 @@ class EtcFstab < ColumnConfigFile
     #
     # @param parent [EtcFstab]
     #
-    def initialize(parent)
+    def initialize(parent = nil)
       super
       @device = nil
       @mount_point = nil
