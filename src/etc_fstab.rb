@@ -66,6 +66,33 @@ class EtcFstab < ColumnConfigFile
     @entries.insert(index, entry)
   end
 
+  # Return all devices in this fstab in the order in which they appear.
+  #
+  # @return [Array<String>]
+  #
+  def devices
+    @entries.map(&:device)
+  end
+
+  # Return all mount points in this fstab in the order in which they appear.
+  #
+  # @return [Array<String>]
+  #
+  def mount_points
+    @entries.map(&:mount_point)
+  end
+
+  # Return all filesystem types in this fstab in the order in which they appear.
+  #
+  # This does not filter out duplicates; use Array::uniq on the result if this
+  # is desired.
+  #
+  # @return [Array<String>]
+  #
+  def fs_types
+    @entries.map(&:fs_type)
+  end
+
   # Check the mount order of all the entries, i.e. if all entries are listed
   # after any mount points they depend on. Call fix_mount_order to fix the
   # problem.

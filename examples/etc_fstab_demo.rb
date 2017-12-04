@@ -43,6 +43,7 @@ def report_mount_order_problems(fstab)
     entry = fstab.entries[problem_index]
     puts("Mount point #{entry.mount_point} is out of sequence!")
   end
+  puts("Current sequence: #{fstab.mount_points}")
   fix_mount_order(fstab)
 end
 
@@ -50,10 +51,7 @@ def fix_mount_order(fstab_old)
   puts("\nSuggested sequence (stripped header and footer comments):\n\n")
   fstab = fstab_old.dup
   fstab.fix_mount_order
-  fstab.header_comments = nil
-  fstab.footer_comments = nil
-  # fstab.entries.each { |entry| entry.comment_before = nil }
-  fstab.write("/dev/stdout")
+  puts(fstab.format_entries.join("\n"))
 end
 
 usage unless ARGV.size == 1

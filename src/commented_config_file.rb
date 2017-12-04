@@ -186,15 +186,24 @@ class CommentedConfigFile
   def format_lines
     lines = []
     lines.concat(@header_comments) if header_comments?
+    lines.concat(format_entries)
+    lines.concat(@footer_comments) if footer_comments?
+    lines
+  end
 
+  # Format only the entries without header or footer comments, but with
+  # comments before each entry and with the line comments.
+  #
+  # @return [Array<String>] formatted entries
+  #
+  def format_entries
+    lines = []
     entries.each do |entry|
       lines.concat(entry.comment_before) if entry.comment_before?
       content_line = entry.format
       content_line += " " + entry.line_comment if entry.line_comment?
       lines << content_line
     end
-
-    lines.concat(@footer_comments) if footer_comments?
     lines
   end
 
