@@ -93,6 +93,28 @@ class EtcFstab < ColumnConfigFile
     @entries.map(&:fs_type)
   end
 
+  # Find the (first) entry with the specified mount point. Return nil if there
+  # is no such entry.
+  #
+  # @param mount_point [String]
+  #
+  # @return [EtcFstab::Entry] or nil if not found
+  #
+  def find_mount_point(mount_point)
+    entries.find { |entry| entry.mount_point == mount_point }
+  end
+
+  # Find the (first) entry with the specified device. Return nil if there
+  # is no such entry.
+  #
+  # @param device [String]
+  #
+  # @return [EtcFstab::Entry] or nil if not found
+  #
+  def find_device(device)
+    entries.find { |entry| entry.device == device }
+  end
+
   # Check the mount order of all the entries, i.e. if all entries are listed
   # after any mount points they depend on. Call fix_mount_order to fix the
   # problem.
