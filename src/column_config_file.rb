@@ -28,8 +28,7 @@ require "commented_config_file"
 class ColumnConfigFile < CommentedConfigFile
   DEFAULT_MAX_COLUMN_WIDTH = 40
   DEFAULT_INPUT_DELIMITER = /\s+/
-  DEFAULT_OUTPUT_DELIMITER = "  "
-  # rubocop:enable Style/MutableConstant
+  DEFAULT_OUTPUT_DELIMITER = "  ".freeze
 
   # @return [Fixnum] the fallback value for the maximum column width if no
   # per-column value is specified for a column.

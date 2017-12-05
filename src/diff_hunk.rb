@@ -88,6 +88,8 @@ class Diff
     #
     # @return [String]
     #
+    # rubocop:disable Lint/UselessAssignment
+    #
     def self.format_header(a, b)
       result = "@@ -"
       result += a.empty? ? "1" : "#{a.first + 1}"
@@ -97,6 +99,7 @@ class Diff
       result += ",#{b.length}" if b.length != 1
       result += " @@"
     end
+    # rubocop:enable Lint/UselessAssignment
 
     def prefix_lines(prefix, lines)
       lines.map { |line| prefix + line }

@@ -105,15 +105,15 @@ class Diff
         merged_lines.concat(hunk.format_lines)
       end
 
-      if !merging
-        if !merged_lines.empty?
-          # Flush pending merged lines
-          result << Hunk.format_header(merged_range_a, merged_range_b)
-          result.concat(merged_lines)
-          merged_lines = []
-        else
-          result.concat(hunk.format)
-        end
+      next if merging
+
+      if !merged_lines.empty?
+        # Flush pending merged lines
+        result << Hunk.format_header(merged_range_a, merged_range_b)
+        result.concat(merged_lines)
+        merged_lines = []
+      else
+        result.concat(hunk.format)
       end
     end
 
@@ -274,7 +274,7 @@ class Diff
       current_first = hunk.removed_range.first
       overlap = prev_last - current_first + 1
       remove_hunk_overlap(prev_hunk.context_lines_after,
-                          hunk.context_lines_before, overlap)
+        hunk.context_lines_before, overlap)
     end
   end
 
@@ -302,3 +302,4 @@ class Diff
     end
   end
 end
+# rubocop:enable Style/Next

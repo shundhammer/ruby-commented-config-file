@@ -37,7 +37,7 @@ def report_mount_order_problems(fstab)
   puts
   puts("*** MOUNT ORDER ERROR! ***")
   problem_index = 0
-  while true
+  loop do
     problem_index = fstab.next_mount_order_problem(problem_index)
     break if problem_index == -1
     entry = fstab.entries[problem_index]

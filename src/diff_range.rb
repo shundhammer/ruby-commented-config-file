@@ -7,8 +7,6 @@
 # License: GPL V2
 #
 
-# rubocop:disable Style/Alias
-
 # Helper class defining an interval to operate in: From line no. 'first'
 # (starting with 0) including to line no. 'last'.
 #

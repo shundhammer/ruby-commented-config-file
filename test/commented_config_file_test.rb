@@ -51,8 +51,7 @@ describe CommentedConfigFile do
     end
 
     it "has the correct parent" do
-      # rubocop:disable Style/CaseEquality
-      expect(entry.parent).to be === subject
+      expect(entry.parent).to equal subject
     end
   end
 
