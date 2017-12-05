@@ -9,10 +9,6 @@
 require_relative "support/spec_helper"
 require "diff_range"
 
-# rubocop:disable Metrics/BlockLength
-# rubocop:disable Style/NumericPredicate
-# rubocop:disable Style/WordArray
-
 describe DiffRange do
   describe "#new" do
     context "created empty" do

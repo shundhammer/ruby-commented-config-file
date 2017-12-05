@@ -26,12 +26,6 @@ require "commented_config_file"
 # the more generic CommentedConfigFile class to handle such cases.
 #
 class ColumnConfigFile < CommentedConfigFile
-  # Get a grip on insane restrictions imposed by rubocop:
-  #
-  # rubocop:disable Style/For
-  # rubocop:disable Style/MutableConstant
-  # rubocop:disable Metrics/LineLength
-
   DEFAULT_MAX_COLUMN_WIDTH = 40
   DEFAULT_INPUT_DELIMITER = /\s+/
   DEFAULT_OUTPUT_DELIMITER = "  "
@@ -231,7 +225,6 @@ class ColumnConfigFile < CommentedConfigFile
     #
     # This default implementation does nothing.
     #
-    # rubocop:disable Style/EmptyMethod
     def populate_columns
     end
 

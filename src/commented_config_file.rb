@@ -7,15 +7,6 @@
 # License: GPL V2
 #
 
-# Get a grip on insane restrictions imposed by rubocop:
-#
-# rubocop:disable Metrics/AbcSize
-# rubocop:disable Metrics/PerceivedComplexity
-# rubocop:disable Metrics/MethodLength
-# rubocop:disable Style/Alias
-# rubocop:disable Style/For
-# rubocop:disable Metrics/ClassLength
-
 # Utility class to read and write config files that might contain comments.
 # This class tries to preserve any existing comments and keep them together
 # with the content line immediately following them.

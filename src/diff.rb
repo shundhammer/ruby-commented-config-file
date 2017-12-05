@@ -7,18 +7,6 @@
 # License: GPL V2
 #
 
-# Get a grip on insane restrictions imposed by rubocop:
-#
-# rubocop:disable Metrics/AbcSize
-# rubocop:disable Metrics/CyclomaticComplexity
-# rubocop:disable Metrics/PerceivedComplexity
-# rubocop:disable Metrics/LineLength
-# rubocop:disable Metrics/BlockLength
-# rubocop:disable Metrics/MethodLength
-# rubocop:disable Metrics/ClassLength
-# rubocop:disable Style/NegatedIf
-# rubocop:disable Style/Next
-
 require "diff_range"
 require "diff_hunk"
 
@@ -295,6 +283,8 @@ class Diff
   # @param prev_context [Array<String>]
   # @param current_context [Array<String>]
   # @param overlap [Fixnum] number of overlapping lines
+  #
+  # rubocop:disable Style/Next
   #
   def remove_hunk_overlap(prev_context, current_context, overlap)
     while overlap > 0

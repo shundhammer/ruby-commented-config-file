@@ -6,12 +6,6 @@
 # License: GPL V2
 #
 
-# Get a grip on insane restrictions imposed by rubocop:
-#
-# rubocop:disable Metrics/LineLength
-# rubocop:disable Metrics/BlockLength
-# rubocop:disable Style/WordArray
-
 require_relative "support/spec_helper"
 require "diff"
 require "pp"

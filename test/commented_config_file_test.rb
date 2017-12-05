@@ -9,11 +9,6 @@
 require_relative "support/spec_helper"
 require "commented_config_file"
 
-# rubocop:disable Lint/AmbiguousRegexpLiteral
-# rubocop:disable Style/RegexpLiteral
-# rubocop:disable Metrics/BlockLength
-# rubocop:disable Metrics/LineLength
-
 describe CommentedConfigFile do
   context "when created empty" do
     subject { described_class.new }

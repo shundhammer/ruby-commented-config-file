@@ -12,11 +12,6 @@ $LOAD_PATH << SRC_PATH
 
 require_relative "../src/column_config_file"
 
-# Get a grip on insane restrictions imposed by rubocop:
-#
-# rubocop:disable Metrics/AbcSize
-# rubocop:disable Metrics/MethodLength
-
 def usage
   $stderr.puts("\nUsage: col_demo <infile-name>\n\n")
   exit(1)

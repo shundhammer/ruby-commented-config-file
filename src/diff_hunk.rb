@@ -7,12 +7,6 @@
 # License: GPL V2
 #
 
-# Get a grip on insane restrictions imposed by rubocop:
-#
-# rubocop:disable Metrics/AbcSize
-# rubocop:disable Style/UnneededInterpolation
-# rubocop:disable Lint/UselessAssignment
-
 require "diff_range"
 
 # Diff helper classes
