@@ -8,6 +8,7 @@ License: GPL V2
 
 - CommentedConfigFile class
 - ColumnConfigFile class
+- EtcFstab class
 - Generic Diff class for string arrays
 
 This is a Ruby clone of my
@@ -154,6 +155,16 @@ into the columns.
 
 The content lines may all have the same number of columns (like in
 `/etc/fstab`), or they might have different numbers of columns.
+
+
+## EtcFstab
+
+This class is derived from ColumConfigFile; it handles Linux/Unix /etc/fstab
+files. In addition to handling the comments and the columns as the
+CommentedConfigFile and ColumConfigFile base classes do, this class gives the
+columns a meaning, and it can handle dependencies between mount points
+(e.g. you want /var/lib mounted after mounting /var if both are on different
+filesystems).
 
 
 ## Diff
