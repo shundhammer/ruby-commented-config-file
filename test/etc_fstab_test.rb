@@ -9,11 +9,6 @@
 require_relative "support/spec_helper"
 require "etc_fstab"
 
-# rubocop:disable Lint/AmbiguousRegexpLiteral
-# rubocop:disable Style/RegexpLiteral
-# rubocop:disable Metrics/BlockLength
-# rubocop:disable Metrics/LineLength
-
 describe EtcFstab do
   context "with demo-fstab" do
     before(:all) { @fstab = described_class.new("data/demo-fstab") }
@@ -96,7 +91,7 @@ describe EtcFstab do
 
       it "the two Linux non-root partitions have fsck_pass 2" do
         entries = subject.entries.select { |e| e.fsck_pass == 2 }
-        devices = entries.map { |e| e.device }
+        devices = entries.map(&:device)
         expected_devices =
           ["/dev/disk/by-label/openSUSE",
            "/dev/disk/by-label/work"]
@@ -138,7 +133,7 @@ describe EtcFstab do
 
     describe "#check_mount_order" do
       it "detects a mount order problem" do
-        expect(subject.check_mount_order).to be_false
+        expect(subject.check_mount_order).to be false
       end
     end
 
@@ -176,7 +171,7 @@ describe EtcFstab do
            "/nas/work",
            "/fritz.nas"]
         expect(new_fstab.mount_points).to eq mount_points
-        expect(new_fstab.check_mount_order).to be_true
+        expect(new_fstab.check_mount_order).to be true
       end
     end
   end
@@ -241,11 +236,11 @@ describe EtcFstab do
 
         # Wrong order as expected
         expect(subject.mount_points).to eq ["/var/lib/myapp", "/var", "/var/lib", "/"]
-        expect(subject.check_mount_order).to be_false
+        expect(subject.check_mount_order).to be false
 
-        expect(subject.fix_mount_order).to be_true
+        expect(subject.fix_mount_order).to be true
         expect(subject.mount_points).to eq ["/", "/var", "/var/lib", "/var/lib/myapp"]
-        expect(subject.check_mount_order).to be_true
+        expect(subject.check_mount_order).to be true
       end
 
       it "does not get an endless loop in the pathological case" do
@@ -254,14 +249,14 @@ describe EtcFstab do
 
         # Wrong order as expected
         expect(subject.mount_points).to eq ["/var/lib", "/var/lib", "/var", "/"]
-        expect(subject.check_mount_order).to be_false
+        expect(subject.check_mount_order).to be false
 
-        expect(subject.fix_mount_order).to be_false
+        expect(subject.fix_mount_order).to be false
         expect(subject.mount_points).to eq ["/", "/var", "/var/lib", "/var/lib"]
 
         # There still is a problem; we couldn't fix it completely.
         # This is expected.
-        expect(subject.check_mount_order).to be_false
+        expect(subject.check_mount_order).to be false
       end
     end
   end

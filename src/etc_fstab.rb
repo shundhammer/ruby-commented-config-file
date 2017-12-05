@@ -216,7 +216,7 @@ class EtcFstab < ColumnConfigFile
   def find_sort_index(new_entry)
     mount_point = new_entry.mount_point
     @entries.each_with_index do |entry, index|
-      next if entry === new_entry
+      next if entry.equal?(new_entry)
       return index if entry.mount_point.start_with?(mount_point)
     end
     -1
@@ -405,9 +405,13 @@ class EtcFstab < ColumnConfigFile
     #
     # @return [Symbol]
     #
+    # Rubocop thinks this is an accessor, but it's not
+    # rubocop:disable Style/AccessorMethodName
+    #
     def get_mount_by
       EtcFstab.get_mount_by(@device)
     end
+    # rubocop:enable Style/AccessorMethodName
 
     protected
 
@@ -446,7 +450,7 @@ class EtcFstab < ColumnConfigFile
     # @return [Regexp] delimiter
     #
     def input_delimiter
-      return ColumnConfigFile::DEFAULT_INPUT_DELIMITER
+      ColumnConfigFile::DEFAULT_INPUT_DELIMITER
     end
 
     # Return the column delimiter used for output, usually two blanks.
@@ -456,7 +460,7 @@ class EtcFstab < ColumnConfigFile
     # @return [String] delimiter
     #
     def output_delimiter
-      return ColumnConfigFile::DEFAULT_OUTPUT_DELIMITER
+      ColumnConfigFile::DEFAULT_OUTPUT_DELIMITER
     end
   end
 
