@@ -1,0 +1,29 @@
+inherit_from: .rubocop_yast_style.yml
+
+# Forbidding for loops completely does not improve code
+Style/For:
+  Enabled: false
+
+Style/SingleLineBlockParams:
+  Enabled: false
+
+Style/Alias:
+  Enabled: false
+
+Style/UnneededInterpolation:
+  Enabled: false
+
+Lint/AmbiguousRegexpLiteral:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Max: 10
+
+Metrics/AbcSize:
+  Max: 40
+
+Metrics/CyclomaticComplexity:
+  Max: 12
+
+Metrics/MethodLength:
+  Max: 50
