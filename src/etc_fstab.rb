@@ -357,12 +357,14 @@ class EtcFstab < ColumnConfigFile
     #
     # @return [Boolean] true if success, false if error
     #
-    # @raise [EtcFstab.ParseError] Incorrect file format
+    # @raise [EtcFstab::ParseError] Incorrect file format
     #
     def parse(line, line_no = -1)
       super
       if @columns.size != 6
-        raise EtcFstab.ParseError, "Wrong number of columns in line #{line_no}"
+        msg = "Wrong number of columns"
+        msg += " in line #{line_no + 1}" if line_no >= 0
+        raise EtcFstab::ParseError, msg
       end
       decoded_col = @columns.map { |col| EtcFstab.fstab_decode(col) }
       @device, @mount_point, @fs_type, opt, @dump_pass, @fsck_pass = decoded_col

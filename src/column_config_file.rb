@@ -72,14 +72,15 @@ class ColumnConfigFile < CommentedConfigFile
     @column_widths = []
   end
 
-  # Format the complete file content into separate lines, including header and
-  # footer comments. This is the reverse operation of 'parse'.
+  # Format only the entries without header or footer comments, but with
+  # comments before each entry and with the line comments.
   #
   # Reimplemented from CommentedConfigFile.
   #
-  # @return [Array<String>] formatted content
+  # @return [Array<String>] formatted entries
   #
-  def format_lines
+  def format_entries
+    populate_columns
     calc_column_widths
     super
   end
@@ -140,6 +141,15 @@ class ColumnConfigFile < CommentedConfigFile
   #
   def count_max_columns
     @entries.reduce(0) { |old_max, entry| [old_max, entry.columns.size].max }
+  end
+
+  # Populate all columns of all entries.
+  #
+  # This is intended for derived entry classes to copy their internal content
+  # to the columns just prior to formatting output.
+  #
+  def populate_columns
+    @entries.each(&:populate_columns)
   end
 
   # Find the maximum column width for one column, limited by that column's

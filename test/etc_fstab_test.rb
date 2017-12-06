@@ -19,7 +19,7 @@ describe EtcFstab do
         expect(subject.entries.size).to eq 9
       end
 
-      it "has the expected other devices" do
+      it "has the expected devices" do
         devices =
           ["/dev/disk/by-label/swap",
            "/dev/disk/by-label/openSUSE",
@@ -129,6 +129,31 @@ describe EtcFstab do
         decoded = described_class.fstab_decode(encoded)
         expect(decoded).to eq orig
       end
+    end
+
+    describe "#get_mount_by" do
+      it "correctly detects a device mounted by label" do
+        entry = subject.find_mount_point("/work")
+        expect(entry).not_to be_nil
+        expect(entry.get_mount_by).to eq :label
+
+        expect(described_class.get_mount_by("LABEL=work")).to eq :label
+      end
+
+      it "correctly detects a device mounted by UUID" do
+        expect(described_class.get_mount_by("UUID=4711")).to eq :uuid
+      end
+
+      it "correctly detects a device mounted by device" do
+        entry = subject.find_mount_point("/nas/work")
+        expect(entry).not_to be_nil
+        expect(entry.get_mount_by).to eq :device
+      end
+
+      it "correctly detects a device mounted by path" do
+        expect(described_class.get_mount_by("/dev/disk/by-path/4711")).to eq :path
+      end
+
     end
 
     describe "#check_mount_order" do
@@ -257,6 +282,65 @@ describe EtcFstab do
         # There still is a problem; we couldn't fix it completely.
         # This is expected.
         expect(subject.check_mount_order).to be false
+      end
+    end
+
+    describe "Entry#parse" do
+      subject { EtcFstab::Entry.new }
+
+      it "parses a correct entry correctly" do
+        subject.parse("/dev/sda1 /data xfs defaults 0 1")
+        expect(subject.device).to eq "/dev/sda1"
+        expect(subject.mount_point).to eq "/data"
+        expect(subject.fs_type).to eq "xfs"
+        expect(subject.mount_opts).to eq []
+        expect(subject.dump_pass).to eq 0
+        expect(subject.fsck_pass).to eq 1
+      end
+
+      it "removes all 'defaults' from the mount options" do
+        subject.parse("/dev/sda1 /data xfs ro,defaults,defaults,foo 0 1")
+        expect(subject.mount_opts).to eq ["ro", "foo"]
+      end
+
+      it "throws an exception if the number of columns is wrong" do
+        expect { subject.parse("/dev/sda1 /data xfs duh defaults 0 1", 42) }
+          .to raise_error(EtcFstab::ParseError, /in line 43/)
+
+        expect { subject.parse("/dev/sda1 /data xfs duh defaults 0 1") }
+          .to raise_error(EtcFstab::ParseError, "Wrong number of columns")
+
+        expect { subject.parse("/dev/sda1 /data defaults 0 1") }
+          .to raise_error(EtcFstab::ParseError)
+      end
+    end
+
+    describe "Entry#format" do
+      subject { EtcFstab::Entry.new }
+
+      it "formats a simple entry correctly" do
+        subject.device = "/dev/sdb7"
+        subject.mount_point = "/work"
+        subject.fs_type = "ext4"
+        subject.populate_columns
+        expect(subject.format).to eq "/dev/sdb7  /work  ext4  defaults  0  0"
+      end
+    end
+
+    describe "#format_lines" do
+      subject { described_class.new }
+
+      it "formats a simple entry correctly" do
+        entry = subject.create_entry
+        entry.device = "/dev/sdk3"
+        entry.mount_point = "/work"
+        entry.fs_type = "ext4"
+        entry.mount_opts << "ro" << "foo" << "bar"
+        subject.add_entry(entry)
+
+        expect(subject.entries.size).to eq 1
+        expect(subject.entries.first).to equal(entry)
+        expect(subject.format_lines).to eq ["/dev/sdk3  /work  ext4  ro,foo,bar  0  0"]
       end
     end
   end
