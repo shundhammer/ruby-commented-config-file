@@ -337,10 +337,11 @@ describe EtcFstab do
         entry.fs_type = "ext4"
         entry.mount_opts << "ro" << "foo" << "bar"
         subject.add_entry(entry)
+        subject.output_delimiter = " "
 
         expect(subject.entries.size).to eq 1
         expect(subject.entries.first).to equal(entry)
-        expect(subject.format_lines).to eq ["/dev/sdk3  /work  ext4  ro,foo,bar  0  0"]
+        expect(subject.format_lines).to eq ["/dev/sdk3 /work ext4 ro,foo,bar 0 0"]
       end
     end
   end

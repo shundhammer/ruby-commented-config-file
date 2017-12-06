@@ -454,16 +454,6 @@ class EtcFstab < ColumnConfigFile
     def input_delimiter
       ColumnConfigFile::DEFAULT_INPUT_DELIMITER
     end
-
-    # Return the column delimiter used for output, usually two blanks.
-    #
-    # Reimplemented from ColumnConfigFile::Entry.
-    #
-    # @return [String] delimiter
-    #
-    def output_delimiter
-      ColumnConfigFile::DEFAULT_OUTPUT_DELIMITER
-    end
   end
 
   # Error class for parsing
