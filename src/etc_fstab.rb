@@ -417,8 +417,6 @@ class EtcFstab < ColumnConfigFile
     end
     # rubocop:enable Style/AccessorMethodName
 
-    protected
-
     # Parse a mount options field and store the result in @mount_opts.
     #
     # This removes any occurrence of "defaults" (which really only makes sense
