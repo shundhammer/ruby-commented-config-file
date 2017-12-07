@@ -17,7 +17,7 @@ describe EtcFstab do
 
     describe "Parser and access methods" do
       it "has the expected number of entries" do
-        expect(subject.entries.size).to eq 9
+        expect(subject.size).to eq 9
       end
 
       it "has the expected devices" do
@@ -91,7 +91,7 @@ describe EtcFstab do
       end
 
       it "the two Linux non-root partitions have fsck_pass 2" do
-        entries = subject.entries.select { |e| e.fsck_pass == 2 }
+        entries = subject.select { |e| e.fsck_pass == 2 }
         devices = entries.map(&:device)
         expected_devices =
           ["/dev/disk/by-label/openSUSE",
@@ -100,13 +100,13 @@ describe EtcFstab do
       end
 
       it "all non-ext4 filesystems have fsck_pass 0" do
-        entries = subject.entries.reject { |e| e.fs_type == "ext4" }
+        entries = subject.reject { |e| e.fs_type == "ext4" }
         nonzero_fsck = entries.reject { |e| e.fsck_pass == 0 }
         expect(nonzero_fsck).to be_empty
       end
 
       it "all dump_pass fields are 0" do
-        dump_pass = subject.entries.map(&:dump_pass)
+        dump_pass = subject.map(&:dump_pass)
         expect(dump_pass.count(0)).to be == 9
       end
     end
@@ -340,8 +340,8 @@ describe EtcFstab do
         subject.add_entry(entry)
         subject.output_delimiter = " "
 
-        expect(subject.entries.size).to eq 1
-        expect(subject.entries.first).to equal(entry)
+        expect(subject.size).to eq 1
+        expect(subject.first).to equal(entry)
         expect(subject.format_lines).to eq ["/dev/sdk3 /work ext4 ro,foo,bar 0 0"]
       end
     end
@@ -358,7 +358,7 @@ describe EtcFstab do
       it "reads the file correctly" do
         # Notice that constructing an EtcFstab with a filename will read that
         # file right away
-        expect(subject.entries.size).to eq 9
+        expect(subject.size).to eq 9
         devices =
           ["/dev/disk/by-label/swap",
            "/dev/disk/by-label/openSUSE",
@@ -378,7 +378,7 @@ describe EtcFstab do
       end
 
       it "has the expected comments before certain entries" do
-        commented = subject.entries.select(&:comment_before?)
+        commented = subject.select(&:comment_before?)
         expect(commented.size).to be == 4
 
         entry = commented.shift
@@ -420,7 +420,7 @@ describe EtcFstab do
       end
 
       it "can modify existing entries" do
-        nas_shares = subject.entries.select { |s| s.device.start_with?("nas:") }
+        nas_shares = subject.select { |s| s.device.start_with?("nas:") }
         nas_shares.each { |s| s.device.gsub!(/^nas/, "home_nas") }
 
         devices =
@@ -439,8 +439,8 @@ describe EtcFstab do
       it "can remove entries" do
         # Removing the longest mount point to test the automatic column sizing
         # and alignment inherited from ColumnConfigFile
-        subject.entries.delete_if { |e| e.mount_point.include?("alternate") }
-        subject.entries.delete_if { |e| e.device.include?("fritz") }
+        subject.delete_if { |e| e.mount_point.include?("alternate") }
+        subject.delete_if { |e| e.device.include?("fritz") }
 
         devices =
           ["/dev/disk/by-label/swap",
@@ -482,7 +482,7 @@ describe EtcFstab do
       end
 
       it "correctly escapes blank characters in device names" do
-        win = subject.entries.select { |e| e.device.include?("Win-") }
+        win = subject.select { |e| e.device.include?("Win-") }
         win.each { |e| e.device.gsub!(/Win-/, "Win ") }
 
         # Using to_s and not Entry.format here to make sure the columns are

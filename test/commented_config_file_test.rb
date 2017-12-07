@@ -213,11 +213,11 @@ describe CommentedConfigFile do
         end
 
         it "Has the correct number of entries" do
-          expect(subject.entries.size).to eq 9
+          expect(subject.size).to eq 9
         end
 
         it "The first entry is correct" do
-          entry = subject.entries.first
+          entry = subject.first
           expect(entry.content).to match /by-label\/swap\s+none\s+swap/
           expect(entry.comment_before.size).to eq 1
           expect(entry.comment_before.first).to match /Linux disk/
@@ -231,7 +231,7 @@ describe CommentedConfigFile do
         end
 
         it "The last entry is correct" do
-          entry = subject.entries.last
+          entry = subject.last
           expect(entry.content).to match /fritz.box.fritz.nas.*cifs.*forcegid/
           expect(entry.comment_before.first).to match /^\s*$/
         end
@@ -253,11 +253,11 @@ describe CommentedConfigFile do
         end
 
         it "Has the correct number of entries" do
-          expect(subject.entries.size).to eq 9
+          expect(subject.size).to eq 9
         end
 
         it "The first entry is correct" do
-          entry = subject.entries.first
+          entry = subject.first
           expect(entry.content).to match /by-label\/swap\s+none\s+swap/
           expect(entry.comment_before?).to eq false
         end
@@ -270,7 +270,7 @@ describe CommentedConfigFile do
         end
 
         it "The last entry is correct" do
-          entry = subject.entries.last
+          entry = subject.last
           expect(entry.content).to match /fritz.box.fritz.nas.*cifs.*forcegid/
           expect(entry.comment_before.first).to match /^\s*$/
         end

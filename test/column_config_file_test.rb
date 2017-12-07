@@ -34,11 +34,11 @@ describe ColumnConfigFile do
         end
 
         it "Has the correct number of entries" do
-          expect(subject.entries.size).to eq 9
+          expect(subject.size).to eq 9
         end
 
         it "The first entry ('swap') is correct" do
-          entry = subject.entries.first
+          entry = subject.first
           expect(entry.columns.size).to eq 6
 
           expect(entry.columns[0]).to eq "/dev/disk/by-label/swap"
@@ -68,7 +68,7 @@ describe ColumnConfigFile do
         end
 
         it "The last entry ('fritz.nas') is correct" do
-          entry = subject.entries.last
+          entry = subject.last
           expect(entry.columns.size).to eq 6
 
           expect(entry.columns[0]).to eq "//fritz.box/fritz.nas/"
