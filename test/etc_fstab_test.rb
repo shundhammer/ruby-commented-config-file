@@ -8,6 +8,7 @@
 
 require_relative "support/spec_helper"
 require "etc_fstab"
+require "fileutils"
 
 describe EtcFstab do
   context "with demo-fstab" do
@@ -347,18 +348,11 @@ describe EtcFstab do
   end
 
   context "with demo-fstab" do
-    before(:all) do
-      @orig_name ="data/demo-fstab"
-      @save_as_name = "data/demo-fstab-modified"
-      File.delete(@save_as_name) if File.exist?(@save_as_name)
-      @fstab = described_class.new(@orig_name)
-    end
-
-    after(:all) do
-      # File.delete(@save_as_name) if File.exist?(@save_as_name)
-    end
-
+    before(:all) { @fstab = described_class.new("data/demo-fstab") }
     subject { @fstab }
+
+    let(:save_as_name) { "data/demo-fstab-2-generated" }
+    let(:modified_reference_name) { "data/demo-fstab-2-expected" }
 
     describe "full-blown read, modify, write cycle" do
       it "read the file correctly" do
@@ -384,7 +378,7 @@ describe EtcFstab do
       end
 
       it "has the expected comments before certain entries" do
-        commented = subject.entries.select { |e| e.comment_before? }
+        commented = subject.entries.select(&:comment_before?)
         expect(commented.size).to be == 4
 
         entry = commented.shift
@@ -428,7 +422,6 @@ describe EtcFstab do
       it "can modify existing entries" do
         nas_shares = subject.entries.select { |s| s.device.start_with?("nas:") }
         nas_shares.each { |s| s.device.gsub!(/^nas/, "home_nas") }
-        puts nas_shares
 
         devices =
           ["/dev/disk/by-label/swap",
@@ -440,11 +433,64 @@ describe EtcFstab do
            "//fritz.box/fritz.nas/",
            "/dev/disk/by-label/Win-Boot",
            "/dev/disk/by-label/Win-App"]
-        # puts subject.devices
-        # puts subject.entries
-        # subject.entries.each { |e| puts e }
         expect(subject.devices).to eq devices
-        subject.write(@save_as_name)
+      end
+
+      it "can remove entries" do
+        # Removing the longest mount point to test the automatic column sizing
+        # and alignment inherited from ColumnConfigFile
+        subject.entries.delete_if { |e| e.mount_point.include?("alternate") }
+        subject.entries.delete_if { |e| e.device.include?("fritz") }
+
+        devices =
+          ["/dev/disk/by-label/swap",
+           "/dev/disk/by-label/Ubuntu",
+           "/dev/disk/by-label/work",
+           "home_nas:/share/sh",
+           "home_nas:/share/work",
+           "/dev/disk/by-label/Win-Boot",
+           "/dev/disk/by-label/Win-App"]
+        expect(subject.devices).to eq devices
+      end
+
+      it "can add entries in the correct order" do
+        entry = subject.create_entry
+        entry.device = "LABEL=logs"
+        entry.mount_point = "/var/log"
+        entry.fs_type = "xfs"
+        subject.add_entry(entry)
+
+        entry = subject.create_entry
+        entry.comment_before = ["", "# Data that keep growing"]
+        entry.device = "LABEL=var"
+        entry.mount_point = "/var"
+        entry.fs_type = "ext2"
+        # This should go before /var/log; add_entry is expected to move it there.
+        subject.add_entry(entry)
+
+        devices =
+          ["/dev/disk/by-label/swap",
+           "/dev/disk/by-label/Ubuntu",
+           "/dev/disk/by-label/work",
+           "home_nas:/share/sh",
+           "home_nas:/share/work",
+           "/dev/disk/by-label/Win-Boot",
+           "/dev/disk/by-label/Win-App",
+           "LABEL=var",
+           "LABEL=logs"]
+        expect(subject.devices).to eq devices
+      end
+
+      it "writes the result to file correctly" do
+        subject.write(save_as_name)
+
+        # If this fails:
+        #   diff -u data/demo-fstab-2-expected data/demo-fstab-2-generated
+        #
+        expect(FileUtils.cmp(save_as_name, modified_reference_name)).to be true
+
+        # Delete the written file if the test passed
+        File.delete(save_as_name) if File.exist?(save_as_name)
       end
     end
   end
