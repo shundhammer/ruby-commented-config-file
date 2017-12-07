@@ -30,7 +30,7 @@ end
 
 def dump_content(file)
   puts("<Content>")
-  file.entries.each_with_index do |entry, entry_no|
+  file.each_with_index do |entry, entry_no|
     if entry.comment_before?
       puts
       entry.comment_before.each_with_index do |line, line_no|

@@ -61,5 +61,5 @@ usage unless ARGV.size == 1
 
 filename = ARGV[0]
 fstab = EtcFstab.new(filename)
-fstab.entries.each { |e| dump_entry(e) }
+fstab.each { |e| dump_entry(e) }
 report_mount_order_problems(fstab)
