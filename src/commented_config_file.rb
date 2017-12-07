@@ -104,9 +104,25 @@ class CommentedConfigFile
     !@footer_comments.nil? && !@footer_comments.empty?
   end
 
-  # Provide iterator infrastructure (select, reject, map, find, ...)
+  # Provide iterator infrastructure. Together with the Enumerable mixin this
+  # provides each, select, reject, map, find, first (but not last) and some
+  # more.
+  #
   def each(&block)
     @entries.each(&block)
+  end
+
+  # Get the last entry. Surprisingly enough, this is not provided by
+  # Enumerable.
+  #
+  # @return [Entry]
+  #
+  def last
+    @entries.last
+  end
+
+  def delete_if(&block)
+    @entries.delete_if(&block)
   end
 
   # Return the number of entries

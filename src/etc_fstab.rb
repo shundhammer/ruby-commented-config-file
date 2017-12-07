@@ -29,7 +29,8 @@ require "column_config_file"
 # the already mounted /var/lib/myapp which is typically not desired.
 #
 # Important / useful inherited methods:
-# read, write, parse, format
+# read, write, parse, format;
+# each, select, reject, map, first, last, delete_if
 #
 class EtcFstab < ColumnConfigFile
   # The usual name of that file
