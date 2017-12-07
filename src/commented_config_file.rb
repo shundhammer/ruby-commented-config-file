@@ -71,6 +71,8 @@
 # the class will handle the comments automagically.
 #
 class CommentedConfigFile
+  include Enumerable
+
   # @return [Array<Entry>] The config file entries.
   attr_accessor :entries
 
@@ -100,6 +102,19 @@ class CommentedConfigFile
 
   def footer_comments?
     !@footer_comments.nil? && !@footer_comments.empty?
+  end
+
+  # Provide iterator infrastructure (select, reject, map, find, ...)
+  def each(&block)
+    @entries.each(&block)
+  end
+
+  # Return the number of entries
+  #
+  # @return [Fixnum]
+  #
+  def size
+    @entries.size
   end
 
   def clear_entries
@@ -189,7 +204,7 @@ class CommentedConfigFile
   #
   def format_entries
     lines = []
-    entries.each do |entry|
+    each do |entry|
       lines.concat(entry.comment_before) if entry.comment_before?
       content_line = entry.format
       content_line += " " + entry.line_comment if entry.line_comment?

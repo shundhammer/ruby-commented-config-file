@@ -140,7 +140,7 @@ class ColumnConfigFile < CommentedConfigFile
   # @return [Fixnum]
   #
   def count_max_columns
-    @entries.reduce(0) { |old_max, entry| [old_max, entry.columns.size].max }
+    reduce(0) { |old_max, entry| [old_max, entry.columns.size].max }
   end
 
   # Populate all columns of all entries.
@@ -149,7 +149,7 @@ class ColumnConfigFile < CommentedConfigFile
   # to the columns just prior to formatting output.
   #
   def populate_columns
-    @entries.each(&:populate_columns)
+    each(&:populate_columns)
   end
 
   # Find the maximum column width for one column, limited by that column's
@@ -157,7 +157,7 @@ class ColumnConfigFile < CommentedConfigFile
   def calc_column_width(column_no)
     max_width = get_max_column_width(column_no)
 
-    @entries.reduce(0) do |old_max, entry|
+    reduce(0) do |old_max, entry|
       col = entry.columns[column_no]
       next old_max if col.nil? # This entry doesn't have that many columns
 

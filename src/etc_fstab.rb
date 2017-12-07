@@ -71,7 +71,7 @@ class EtcFstab < ColumnConfigFile
   # @return [Array<String>]
   #
   def devices
-    @entries.map(&:device)
+    map(&:device)
   end
 
   # Return all mount points in this fstab in the order in which they appear.
@@ -79,7 +79,7 @@ class EtcFstab < ColumnConfigFile
   # @return [Array<String>]
   #
   def mount_points
-    @entries.map(&:mount_point)
+    map(&:mount_point)
   end
 
   # Return all filesystem types in this fstab in the order in which they appear.
@@ -90,7 +90,7 @@ class EtcFstab < ColumnConfigFile
   # @return [Array<String>]
   #
   def fs_types
-    @entries.map(&:fs_type)
+    map(&:fs_type)
   end
 
   # Find the (first) entry with the specified mount point. Return nil if there
@@ -101,7 +101,7 @@ class EtcFstab < ColumnConfigFile
   # @return [EtcFstab::Entry] or nil if not found
   #
   def find_mount_point(mount_point)
-    entries.find { |entry| entry.mount_point == mount_point }
+    find { |entry| entry.mount_point == mount_point }
   end
 
   # Find the (first) entry with the specified device. Return nil if there
@@ -112,7 +112,7 @@ class EtcFstab < ColumnConfigFile
   # @return [EtcFstab::Entry] or nil if not found
   #
   def find_device(device)
-    entries.find { |entry| entry.device == device }
+    find { |entry| entry.device == device }
   end
 
   # Check the mount order of all the entries, i.e. if all entries are listed
@@ -194,7 +194,7 @@ class EtcFstab < ColumnConfigFile
   # @return [Fixnum] Next problematic entry index or -1 if no more problems
   #
   def next_mount_order_problem(start_index = 0)
-    @entries.each_with_index do |entry, index|
+    each_with_index do |entry, index|
       next if index < start_index
       sort_index = find_sort_index(entry)
       next if sort_index == -1
@@ -215,7 +215,7 @@ class EtcFstab < ColumnConfigFile
   #
   def find_sort_index(new_entry)
     mount_point = new_entry.mount_point
-    @entries.each_with_index do |entry, index|
+    each_with_index do |entry, index|
       next if entry.equal?(new_entry)
       return index if entry.mount_point.start_with?(mount_point)
     end
