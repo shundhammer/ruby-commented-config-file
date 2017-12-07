@@ -237,6 +237,20 @@ class ColumnConfigFile < CommentedConfigFile
     def populate_columns
     end
 
+    # String conversion, mostly for debugging.
+    #
+    # Make sure that the columns are updated: Derived classes (e.g. EtcFstab)
+    # typically operate on data members that are parsed from the individual
+    # columns, so we need to give the derived class a chance to update the
+    # columns from those data members to get meaningful output.
+    #
+    # @return [String]
+    #
+    def to_s
+      populate_columns
+      format
+    end
+
     protected
 
     # Return the column delimiter used for input (parsing).

@@ -345,4 +345,107 @@ describe EtcFstab do
       end
     end
   end
+
+  context "with demo-fstab" do
+    before(:all) do
+      @orig_name ="data/demo-fstab"
+      @save_as_name = "data/demo-fstab-modified"
+      File.delete(@save_as_name) if File.exist?(@save_as_name)
+      @fstab = described_class.new(@orig_name)
+    end
+
+    after(:all) do
+      # File.delete(@save_as_name) if File.exist?(@save_as_name)
+    end
+
+    subject { @fstab }
+
+    describe "full-blown read, modify, write cycle" do
+      it "read the file correctly" do
+        # Notice that constructing an EtcFstab with a filename will read that
+        # file right away
+        expect(subject.entries.size).to eq 9
+        devices =
+          ["/dev/disk/by-label/swap",
+           "/dev/disk/by-label/openSUSE",
+           "/dev/disk/by-label/Ubuntu",
+           "/dev/disk/by-label/work",
+           "/dev/disk/by-label/Win-Boot",
+           "/dev/disk/by-label/Win-App",
+           "nas:/share/sh",
+           "nas:/share/work",
+           "//fritz.box/fritz.nas/"]
+        expect(subject.devices).to eq devices
+      end
+
+      it "has the expected header and footer comments" do
+        expect(subject.header_comments.size).to be == 15
+        expect(subject.footer_comments.size).to be == 1
+      end
+
+      it "has the expected comments before certain entries" do
+        commented = subject.entries.select { |e| e.comment_before? }
+        expect(commented.size).to be == 4
+
+        entry = commented.shift
+        expect(entry.fs_type).to eq "swap"
+        expect(entry.comment_before).to eq ["# Linux disk"]
+
+        entry = commented.shift
+        expect(entry.mount_point).to eq "/win/boot"
+        expect(entry.comment_before).to eq ["", "# Windows disk"]
+
+        entry = commented.shift
+        expect(entry.mount_point).to eq "/nas/sh"
+        expect(entry.comment_before).to eq ["", "# Network"]
+
+        entry = commented.shift
+        expect(entry.mount_point).to eq "/fritz.nas"
+        expect(entry.comment_before).to eq [""]
+      end
+
+      it "can rearrange entries" do
+        win_boot = subject.find_mount_point("/win/boot")
+        win_app = subject.find_mount_point("/win/app")
+
+        # Move both Windows partitions to the end (after the network shares)
+        subject.entries -= [win_boot, win_app]
+        subject.entries << win_boot << win_app
+
+        mount_points =
+          ["none",
+           "/alternate-root",
+           "/",
+           "/work",
+           "/nas/sh",
+           "/nas/work",
+           "/fritz.nas",
+           "/win/boot",
+           "/win/app"]
+        expect(subject.mount_points).to eq mount_points
+      end
+
+      it "can modify existing entries" do
+        nas_shares = subject.entries.select { |s| s.device.start_with?("nas:") }
+        nas_shares.each { |s| s.device.gsub!(/^nas/, "home_nas") }
+        puts nas_shares
+
+        devices =
+          ["/dev/disk/by-label/swap",
+           "/dev/disk/by-label/openSUSE",
+           "/dev/disk/by-label/Ubuntu",
+           "/dev/disk/by-label/work",
+           "home_nas:/share/sh",
+           "home_nas:/share/work",
+           "//fritz.box/fritz.nas/",
+           "/dev/disk/by-label/Win-Boot",
+           "/dev/disk/by-label/Win-App"]
+        # puts subject.devices
+        # puts subject.entries
+        # subject.entries.each { |e| puts e }
+        expect(subject.devices).to eq devices
+        subject.write(@save_as_name)
+      end
+    end
+  end
 end
