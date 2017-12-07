@@ -382,6 +382,14 @@ class EtcFstab < ColumnConfigFile
     # Reimplemented from ColumnConfigFile::Entry.
     #
     def populate_columns
+      @columns =
+        [@device,
+         @mount_point,
+         @fs_type,
+         format_mount_opts,
+         @dump_pass.to_s,
+         @fsck_pass.to_s]
+
       # Strictly speaking, space characters are only permitted in the
       # mount_point column according to "man fstab". But better be safe than
       # sorry; there might be a space character also in a device label or in
@@ -391,16 +399,10 @@ class EtcFstab < ColumnConfigFile
       #
       # On the downside, this does not let us strip all the other fields
       # because we might strip away a space character that was intentional; so
-      # it's the caller's responsibility to make sure that there are not
+      # it's the caller's responsibility to make sure that there are no
       # unintended space characters in any of the fields.
 
-      @columns =
-        [@device,
-         @mount_point,
-         @fs_type,
-         format_mount_opts,
-         @dump_pass.to_s,
-         @fsck_pass.to_s].map { |col| EtcFstab.fstab_encode(col) }
+      @columns.map! { |col| EtcFstab.fstab_encode(col) }
     end
 
     # Get the "mount_by" type of this entry. See EtcFstab::get_mount_by.
