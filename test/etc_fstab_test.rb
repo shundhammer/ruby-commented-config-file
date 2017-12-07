@@ -269,7 +269,7 @@ describe EtcFstab do
         expect(subject.check_mount_order).to be true
       end
 
-      it "does not get an endless loop in the pathological case" do
+      it "does not get into an endless loop in the pathological case" do
         # Intentionally using the wrong superclass method to add items.
         subject.entries << var_lib << var_lib2 << var << root
 
