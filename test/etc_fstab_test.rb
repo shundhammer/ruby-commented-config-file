@@ -155,7 +155,6 @@ describe EtcFstab do
       it "correctly detects a device mounted by path" do
         expect(described_class.get_mount_by("/dev/disk/by-path/pci-00:11.4")).to eq :path
       end
-
     end
 
     describe "#check_mount_order" do
@@ -356,7 +355,7 @@ describe EtcFstab do
     let(:modified_reference_name) { "data/demo-fstab-2-expected" }
 
     describe "full-blown read, modify, write cycle" do
-      it "read the file correctly" do
+      it "reads the file correctly" do
         # Notice that constructing an EtcFstab with a filename will read that
         # file right away
         expect(subject.entries.size).to eq 9
@@ -480,6 +479,18 @@ describe EtcFstab do
            "LABEL=var",
            "LABEL=logs"]
         expect(subject.devices).to eq devices
+      end
+
+      it "correctly escapes blank characters in device names" do
+        win = subject.entries.select { |e| e.device.include?("Win-") }
+        win.each { |e| e.device.gsub!(/Win-/, "Win ") }
+
+        # Using to_s and not Entry.format here to make sure the columns are
+        # updated (populated) from the fields which Entry.to_s enforces, but
+        # Entry.format does not (for efficiency).
+
+        expect(win[0].to_s).to include "/Win\\040Boot"
+        expect(win[1].to_s).to include "/Win\\040App"
       end
 
       it "writes the result to file correctly" do
