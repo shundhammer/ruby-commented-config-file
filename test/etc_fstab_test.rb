@@ -143,6 +143,7 @@ describe EtcFstab do
 
       it "correctly detects a device mounted by UUID" do
         expect(described_class.get_mount_by("UUID=4711")).to eq :uuid
+        expect(described_class.get_mount_by("/dev/disk/by-uuid/4711")).to eq :uuid
       end
 
       it "correctly detects a device mounted by device" do
@@ -152,7 +153,7 @@ describe EtcFstab do
       end
 
       it "correctly detects a device mounted by path" do
-        expect(described_class.get_mount_by("/dev/disk/by-path/4711")).to eq :path
+        expect(described_class.get_mount_by("/dev/disk/by-path/pci-00:11.4")).to eq :path
       end
 
     end
