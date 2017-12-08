@@ -33,15 +33,15 @@ describe EtcFstab::Entry do
 
     it "can be created from a hash" do
       args =
-      {
-        device:      "/dev/vda2",
-        mount_point: "/home",
-        fs_type:     "xfs",
-        mount_opts:  ["foo", "bar"],
-        dump_pass:   42,
-        fsck_pass:   3,
-        comment_before: ["# Home", "# sweet home"]
-      }
+        {
+          device:         "/dev/vda2",
+          mount_point:    "/home",
+          fs_type:        "xfs",
+          mount_opts:     ["foo", "bar"],
+          dump_pass:      42,
+          fsck_pass:      3,
+          comment_before: ["# Home", "# sweet home"]
+        }
 
       entry = described_class.new(args)
       expect(entry).not_to be_nil
