@@ -8,7 +8,6 @@
 #
 
 require "column_config_file"
-require "pp"
 
 # Class to handle /etc/fstab of a Linux/Unix system.
 #

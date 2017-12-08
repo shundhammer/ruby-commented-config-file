@@ -8,7 +8,6 @@
 
 require_relative "support/spec_helper"
 require "diff"
-require "pp"
 
 def read_file(filename)
   lines = []

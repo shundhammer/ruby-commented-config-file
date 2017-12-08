@@ -8,12 +8,8 @@
 
 require_relative "support/spec_helper"
 require "etc_fstab"
-require "fileutils"
 
 describe EtcFstab::Entry do
-  before(:all) { @fstab = EtcFstab.new }
-  let(:fstab) { @fstab }
-
   describe "#new" do
     it "can be created empty" do
       entry = described_class.new
