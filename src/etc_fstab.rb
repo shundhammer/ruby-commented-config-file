@@ -8,6 +8,7 @@
 #
 
 require "column_config_file"
+require "pp"
 
 # Class to handle /etc/fstab of a Linux/Unix system.
 #
@@ -282,10 +283,14 @@ class EtcFstab < ColumnConfigFile
   #
   # Reimplemented from CommentedConfigFile.
   #
+  # @param args [Hash] or [Array]
+  #
   # @return [ColumnConfigFile::Entry] new entry
   #
-  def create_entry
-    EtcFstab::Entry.new(self)
+  def create_entry(*args)
+    entry = EtcFstab::Entry.new(*args)
+    entry.parent = self
+    entry
   end
 
   #
@@ -334,18 +339,114 @@ class EtcFstab < ColumnConfigFile
     # NFS or CIFS (Samba)).
     attr_accessor :fsck_pass
 
-    # Constructor.
+    # Constructor: Create a new Entry either empty or from a hash or from an
+    # array.
     #
-    # @param parent [EtcFstab]
+    # Use a hash with keys :device, :mount_point, :fs_type, :mount_opts,
+    # :dump_pass, :fsck_pass, :comment_before to fill the corresponding
+    # fields. All keys are optional.
     #
-    def initialize(parent = nil)
-      super
+    # Use an array with the same meaning as in /etc/fstab to fill the
+    # corresponding fields: device, mount_point, fs_type, mount_opts,
+    # dump_pass, fsck_pass.
+    #
+    # In either case, mount_opts can be specified as a string (in which case it
+    # will be parsed just like when it is read from file, removing "defaults"
+    # in the process), or as an array.
+    #
+    # Of course, you can always create the entry empty and use the accessors to
+    # set values.
+    #
+    # @param args [Hash] or [Array]
+    #
+    def initialize(*args)
+      super(nil)
       @device = nil
       @mount_point = nil
       @fs_type = nil
       @mount_opts = []
       @dump_pass = 0
       @fsck_pass = 0
+
+      return if args.empty?
+
+      if args.first.is_a?(Hash)
+        from_hash(args.first)
+      elsif args.first.is_a?(Array)
+        from_array(args.first)
+      else
+        from_array(args)
+      end
+    end
+
+    # Initialize an entry from a hash.
+    # The mount options can be specified as an array or as a string.
+    #
+    # @param args [Hash]
+    #
+    def from_hash(args)
+      @device         = args[:device] || @device
+      @mount_point    = args[:mount_point] || @mount_point
+      @fs_type        = args[:fs_type] || @fs_type
+      @dump_pass      = args[:dump_pass] || @dump_pass
+      @fsck_pass      = args[:fsck_pass] || @dump_pass
+      @comment_before = args[:comment_before] || @comment_before
+
+      return unless args.key?(:mount_opts)
+
+      @mount_opts = args[:mount_opts]
+      parse_mount_opts(@mount_opts) if @mount_opts.is_a?(String)
+    end
+
+    # Initialize an entry from an array.
+    #
+    # The order in the array is the same as in /etc/fstab;
+    # the array may contain 1..6 elements.
+    #
+    # The mount options can be specified as a sub-array or as a string.
+    #
+    # @param args [Array]
+    #
+    def from_array(args)
+      args = args.dup
+      @device      = args.shift unless args.empty?
+      @mount_point = args.shift unless args.empty?
+      @fs_type     = args.shift unless args.empty?
+
+      if !args.empty?
+        @mount_opts = args.shift
+        parse_mount_opts(@mount_opts) if @mount_opts.is_a?(String)
+      end
+
+      @dump_pass = args.shift unless args.empty?
+      @fsck_pass = args.shift unless args.empty?
+    end
+
+    # Convert to an array in the same order as in /etc/fstab.
+    # mount_opts remains an array (and without "defaults").
+    #
+    # @return [Array]
+    #
+    def to_a
+      [@device, @mount_point, @fs_type, @mount_opts, @dump_pass, @fsck_pass]
+    end
+
+    # Convert to a hash with keys :device, :mount_point, :fs_type,
+    # :mount:opts, :dump_pass, :fsck_pass.
+    #
+    # mount_opts remains an array (and without "defaults").
+    #
+    # @return [Hash]
+    #
+    def to_h
+      {
+        device:      @device,
+        mount_point: @mount_point,
+        fs_type:     @fs_type,
+        mount_opts:  @mount_opts,
+        dump_pass:   @dump_pass,
+        fsck_pass:   @fsck_pass
+      }
     end
 
     # Parse a content line. This expects any line comment and the newline to be
