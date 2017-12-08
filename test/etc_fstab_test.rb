@@ -206,43 +206,23 @@ describe EtcFstab do
     subject { described_class.new }
 
     let(:root) do
-      entry = EtcFstab::Entry.new
-      entry.device = "/dev/sda1"
-      entry.mount_point = "/"
-      entry.fs_type = "ext4"
-      entry
+      EtcFstab::Entry.new("/dev/sda1", "/", "ext4")
     end
 
     let(:var) do
-      entry = EtcFstab::Entry.new
-      entry.device = "/dev/sda2"
-      entry.mount_point = "/var"
-      entry.fs_type = "xfs"
-      entry
+      EtcFstab::Entry.new("/dev/sda2", "/var", "xfs")
     end
 
     let(:var_lib) do
-      entry = EtcFstab::Entry.new
-      entry.device = "/dev/sda3"
-      entry.mount_point = "/var/lib"
-      entry.fs_type = "jfs"
-      entry
+      EtcFstab::Entry.new("/dev/sda3", "/var/lib", "jfs")
     end
 
     let(:var_lib_myapp) do
-      entry = EtcFstab::Entry.new
-      entry.device = "/dev/sda4"
-      entry.mount_point = "/var/lib/myapp"
-      entry.fs_type = "ext3"
-      entry
+      EtcFstab::Entry.new("/dev/sda4", "/var/lib/myapp", "ext3")
     end
 
     let(:var_lib2) do
-      entry = EtcFstab::Entry.new
-      entry.device = "/dev/sda5"
-      entry.mount_point = "/var/lib"
-      entry.fs_type = "ext2"
-      entry
+      EtcFstab::Entry.new("/dev/sda5", "/var/lib", "ext2")
     end
 
     describe "#add_entry" do
@@ -286,57 +266,12 @@ describe EtcFstab do
       end
     end
 
-    describe "Entry#parse" do
-      subject { EtcFstab::Entry.new }
-
-      it "parses a correct entry correctly" do
-        subject.parse("/dev/sda1 /data xfs defaults 0 1")
-        expect(subject.device).to eq "/dev/sda1"
-        expect(subject.mount_point).to eq "/data"
-        expect(subject.fs_type).to eq "xfs"
-        expect(subject.mount_opts).to eq []
-        expect(subject.dump_pass).to eq 0
-        expect(subject.fsck_pass).to eq 1
-      end
-
-      it "removes all 'defaults' from the mount options" do
-        subject.parse("/dev/sda1 /data xfs ro,defaults,defaults,foo 0 1")
-        expect(subject.mount_opts).to eq ["ro", "foo"]
-      end
-
-      it "throws an exception if the number of columns is wrong" do
-        expect { subject.parse("/dev/sda1 /data xfs duh defaults 0 1", 42) }
-          .to raise_error(EtcFstab::ParseError, /in line 43/)
-
-        expect { subject.parse("/dev/sda1 /data xfs duh defaults 0 1") }
-          .to raise_error(EtcFstab::ParseError, "Wrong number of columns")
-
-        expect { subject.parse("/dev/sda1 /data defaults 0 1") }
-          .to raise_error(EtcFstab::ParseError)
-      end
-    end
-
-    describe "Entry#format" do
-      subject { EtcFstab::Entry.new }
-
-      it "formats a simple entry correctly" do
-        subject.device = "/dev/sdb7"
-        subject.mount_point = "/work"
-        subject.fs_type = "ext4"
-        subject.populate_columns
-        expect(subject.format).to eq "/dev/sdb7  /work  ext4  defaults  0  0"
-      end
-    end
-
     describe "#format_lines" do
       subject { described_class.new }
 
       it "formats a simple entry correctly" do
-        entry = subject.create_entry
-        entry.device = "/dev/sdk3"
-        entry.mount_point = "/work"
-        entry.fs_type = "ext4"
-        entry.mount_opts << "ro" << "foo" << "bar"
+        entry = subject.create_entry(device: "/dev/sdk3", mount_point: "/work",
+          fs_type: "ext4", mount_opts: ["ro", "foo", "bar"])
         subject.add_entry(entry)
         subject.output_delimiter = " "
 
@@ -454,17 +389,11 @@ describe EtcFstab do
       end
 
       it "can add entries in the correct order" do
-        entry = subject.create_entry
-        entry.device = "LABEL=logs"
-        entry.mount_point = "/var/log"
-        entry.fs_type = "xfs"
+        entry = subject.create_entry("LABEL=logs", "/var/log", "xfs")
         subject.add_entry(entry)
 
-        entry = subject.create_entry
+        entry = subject.create_entry("LABEL=var", "/var", "ext2")
         entry.comment_before = ["", "# Data that keep growing"]
-        entry.device = "LABEL=var"
-        entry.mount_point = "/var"
-        entry.fs_type = "ext2"
         # This should go before /var/log; add_entry is expected to move it there.
         subject.add_entry(entry)
 
