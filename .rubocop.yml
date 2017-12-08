@@ -1,5 +1,10 @@
 inherit_from: .rubocop_yast_style.yml
 
+# Getting a grip on completely insane rubocop defaults.
+#
+# Seriously, who comes up with those?  Are they doing any serious work with
+# Ruby, or they you just playing around?
+
 # Forbidding for loops completely does not improve code
 Style/For:
   Enabled: false
@@ -11,6 +16,12 @@ Style/Alias:
   Enabled: false
 
 Style/UnneededInterpolation:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false
+
+Style/EmptyMethod:
   Enabled: false
 
 Lint/AmbiguousRegexpLiteral:
@@ -27,3 +38,7 @@ Metrics/CyclomaticComplexity:
 
 Metrics/MethodLength:
   Max: 50
+
+Metrics/BlockLength:
+  Max: 2000
+
