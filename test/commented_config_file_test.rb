@@ -11,8 +11,6 @@ require "commented_config_file"
 
 describe CommentedConfigFile do
   context "when created empty" do
-    subject { described_class.new }
-
     describe "#new" do
       it "has no content" do
         expect(subject.header_comments).to be_nil
@@ -81,8 +79,6 @@ describe CommentedConfigFile do
 
   context "Low-level parser" do
     describe "#comment_line?" do
-      subject { described_class.new }
-
       context "with the default '#' comment marker" do
         it "Detects a simple comment line" do
           expect(subject.comment_line?("# foo")).to eq true
@@ -137,8 +133,6 @@ describe CommentedConfigFile do
     end
 
     describe "#empty_line?" do
-      subject { described_class.new }
-
       it "Detects a completely empty line" do
         expect(subject.empty_line?("")).to eq true
       end
@@ -160,8 +154,6 @@ describe CommentedConfigFile do
     end
 
     describe "#split_off_comment" do
-      subject { described_class.new }
-
       it "Splits a simple line with a comment correctly" do
         expect(subject.split_off_comment("foo = bar # baz")).to eq ["foo = bar", "# baz"]
       end
