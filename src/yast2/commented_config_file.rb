@@ -3,6 +3,9 @@
 # CommentedConfigFile class
 #
 # (c) 2017 Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+#     Donated to the YaST project
+#
+# Original project: https://github.com/shundhammer/ruby-commented-config-file
 #
 # License: GPL V2
 #
@@ -278,7 +281,7 @@ class CommentedConfigFile
     Entry.new(self)
   end
 
-  protected
+protected
 
   # Parse the entries in 'lines'. Header and footer comments should already
   # removed from 'lines'.
@@ -291,6 +294,8 @@ class CommentedConfigFile
   # @param to   [Fixnum] line number of the last  line to parse
   #
   # @return [Boolean] true if success, false if error
+  #
+  # rubocop:disable Style/For
   #
   def parse_entries(lines, from, to)
     clear_entries

@@ -1,13 +1,17 @@
 #!/usr/bin/rspec
 #
-# Unit test for CommentedConfigFile
+# Unit test for EtcFstab::Entry
+#
 # (c) 2017 Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+#     Donated to the YaST project
+#
+# Original project: https://github.com/shundhammer/ruby-commented-config-file
 #
 # License: GPL V2
 #
 
-require_relative "support/spec_helper"
-require "etc_fstab"
+require_relative "test_helper"
+require "yast2/etc_fstab"
 
 describe EtcFstab::Entry do
   describe "#new" do

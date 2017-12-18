@@ -3,11 +3,14 @@
 # CommentedConfigFile class
 #
 # (c) 2017 Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+#     Donated to the YaST project
+#
+# Original project: https://github.com/shundhammer/ruby-commented-config-file
 #
 # License: GPL V2
 #
 
-require "commented_config_file"
+require "yast2/commented_config_file"
 
 # Utility class to read and write column-oriented config files that might
 # contain comments that should be preserved when writing the file.
@@ -113,6 +116,8 @@ class ColumnConfigFile < CommentedConfigFile
   #
   # @return [Array<Fixnum>] column widths
   #
+  # rubocop:disable Style/For
+  #
   def calc_column_widths
     return [] unless @pad_columns
     @column_widths = []
@@ -133,7 +138,7 @@ class ColumnConfigFile < CommentedConfigFile
     ColumnConfigFile::Entry.new(self)
   end
 
-  protected
+protected
 
   # Count the maximum number of columns amont all entries.
   #
@@ -251,7 +256,7 @@ class ColumnConfigFile < CommentedConfigFile
       format
     end
 
-    protected
+  protected
 
     # Return the column delimiter used for input (parsing).
     #

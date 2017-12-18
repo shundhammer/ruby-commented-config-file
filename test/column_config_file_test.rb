@@ -1,21 +1,27 @@
 #!/usr/bin/rspec
 #
-# Unit test for CommentedConfigFile
+# Unit test for ColumnConfigFile
+#
 # (c) 2017 Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+#     Donated to the YaST project
+#
+# Original project: https://github.com/shundhammer/ruby-commented-config-file
 #
 # License: GPL V2
 #
 
-require_relative "support/spec_helper"
-require "column_config_file"
+require_relative "test_helper"
+require "yast2/column_config_file"
 
 describe ColumnConfigFile do
+  # rubocop:disable Lint/AmbiguousRegexpLiteral
+
   context "Parser" do
     describe "#parse" do
       context "Demo /etc/fstab with header and footer comments" do
         before(:all) do
           @file = described_class.new
-          @file.read("data/demo-fstab")
+          @file.read(TEST_DATA + "fstab/demo-fstab")
         end
         subject { @file }
 
@@ -97,14 +103,14 @@ describe ColumnConfigFile do
       end
 
       it "reproduces exactly the original format with header and footer" do
-        orig = read_orig("data/demo-fstab")
-        formatted = reformat("data/demo-fstab")
+        orig = read_orig(TEST_DATA + "fstab/demo-fstab")
+        formatted = reformat(TEST_DATA + "fstab/demo-fstab")
         expect(formatted).to eq orig
       end
 
       it "reproduces exactly the original format without header or footer" do
-        orig = read_orig("data/demo-fstab-no-header")
-        formatted = reformat("data/demo-fstab-no-header")
+        orig = read_orig(TEST_DATA + "fstab/demo-fstab-no-header")
+        formatted = reformat(TEST_DATA + "fstab/demo-fstab-no-header")
         expect(formatted).to eq orig
       end
     end

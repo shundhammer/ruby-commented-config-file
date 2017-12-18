@@ -1,15 +1,21 @@
 #!/usr/bin/rspec
 #
 # Unit test for CommentedConfigFile
+#
 # (c) 2017 Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+#     Donated to the YaST project
+#
+# Original project: https://github.com/shundhammer/ruby-commented-config-file
 #
 # License: GPL V2
 #
 
-require_relative "support/spec_helper"
-require "commented_config_file"
+require_relative "test_helper"
+require "yast2/commented_config_file"
 
 describe CommentedConfigFile do
+  # rubocop:disable Lint/AmbiguousRegexpLiteral
+
   context "when created empty" do
     describe "#new" do
       it "has no content" do
@@ -216,7 +222,7 @@ describe CommentedConfigFile do
       context "Demo /etc/fstab with header and footer comments" do
         before(:all) do
           @file = described_class.new
-          @file.read("data/demo-fstab")
+          @file.read(TEST_DATA + "fstab/demo-fstab")
         end
         subject { @file }
 
@@ -262,7 +268,7 @@ describe CommentedConfigFile do
       context "Demo /etc/fstab without header and footer comments" do
         before(:all) do
           @file = described_class.new
-          @file.read("data/demo-fstab-no-header")
+          @file.read(TEST_DATA + "fstab/demo-fstab-no-header")
         end
         subject { @file }
 
@@ -313,20 +319,20 @@ describe CommentedConfigFile do
       end
 
       it "reproduces exactly the original format with header and footer" do
-        orig = read_orig("data/demo-fstab")
-        formatted = reformat("data/demo-fstab")
+        orig = read_orig(TEST_DATA + "fstab/demo-fstab")
+        formatted = reformat(TEST_DATA + "fstab/demo-fstab")
         expect(formatted).to eq orig
       end
 
       it "reproduces exactly the original format without header or footer" do
-        orig = read_orig("data/demo-fstab-no-header")
-        formatted = reformat("data/demo-fstab-no-header")
+        orig = read_orig(TEST_DATA + "fstab/demo-fstab-no-header")
+        formatted = reformat(TEST_DATA + "fstab/demo-fstab-no-header")
         expect(formatted).to eq orig
       end
 
       it "reproduces exactly the original format for demo-sudoers" do
-        orig = read_orig("data/demo-sudoers")
-        formatted = reformat("data/demo-sudoers")
+        orig = read_orig(TEST_DATA + "fstab/demo-sudoers")
+        formatted = reformat(TEST_DATA + "fstab/demo-sudoers")
         expect(formatted).to eq orig
       end
     end

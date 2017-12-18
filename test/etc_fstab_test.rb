@@ -1,18 +1,22 @@
 #!/usr/bin/rspec
 #
-# Unit test for CommentedConfigFile
+# Unit test for EtcFstab
+#
 # (c) 2017 Stefan Hundhammer <Stefan.Hundhammer@gmx.de>
+#     Donated to the YaST project
+#
+# Original project: https://github.com/shundhammer/ruby-commented-config-file
 #
 # License: GPL V2
 #
 
-require_relative "support/spec_helper"
-require "etc_fstab"
+require_relative "test_helper"
+require "yast2/etc_fstab"
 require "fileutils"
 
 describe EtcFstab do
   context "with demo-fstab" do
-    before(:all) { @fstab = described_class.new("data/demo-fstab") }
+    before(:all) { @fstab = described_class.new(TEST_DATA + "fstab/demo-fstab") }
     subject { @fstab }
 
     describe "Parser and access methods" do
@@ -279,11 +283,11 @@ describe EtcFstab do
   end
 
   context "with demo-fstab" do
-    before(:all) { @fstab = described_class.new("data/demo-fstab") }
+    before(:all) { @fstab = described_class.new(TEST_DATA + "fstab/demo-fstab") }
     subject { @fstab }
 
-    let(:save_as_name) { "data/demo-fstab-2-generated" }
-    let(:modified_reference_name) { "data/demo-fstab-2-expected" }
+    let(:save_as_name) { TEST_DATA + "fstab/demo-fstab-2-generated" }
+    let(:modified_reference_name) { TEST_DATA + "fstab/demo-fstab-2-expected" }
 
     describe "full-blown read, modify, write cycle" do
       it "reads the file correctly" do
@@ -422,7 +426,7 @@ describe EtcFstab do
         subject.write(save_as_name)
 
         # If this fails:
-        #   diff -u data/demo-fstab-2-expected data/demo-fstab-2-generated
+        #   diff -u data/fstab/demo-fstab-2-expected data/fstab/demo-fstab-2-generated
         #
         expect(FileUtils.cmp(save_as_name, modified_reference_name)).to be true
 
